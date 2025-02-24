@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guitar Fretboard Trainer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+        h1 {
+            color: #00cc99;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .options {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .options h3 {
+            margin-top: 0;
+        }
+        .options label {
+            margin: 0 10px;
+            color: #ccc;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .options input[type="number"] {
+            width: 50px;
+            padding: 5px;
+            border: none;
+            border-radius: 4px;
+            background: #404040;
+            color: #fff;
+        }
+        #triadInversions {
+            display: none;
+            margin-top: 10px;
+        }
+        .fretboard-container {
+            background: #252525;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .fretboard {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #333;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .string {
+            display: flex;
+            gap: 2px;
+        }
+        .fret {
+            width: 40px;
+            height: 20px;
+            background: #555;
+            border: 1px solid #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .fret.open {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: transparent;
+            border: 2px solid #888;
+        }
+        .fret.active {
+            background: #00cc99;
+            color: #000;
+            font-weight: bold;
+        }
+        .fret.open.active {
+            background: #00cc99;
+            border-color: #00cc99;
+        }
+        .fret.dot::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ccc;
+            border-radius: 50%;
+        }
+        .fret.double-dot::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ccc;
+            border-radius: 50%;
+            top: 2px;
+        }
+        .fret.double-dot::before {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ccc;
+            border-radius: 50%;
+            bottom: 2px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 20px;
+            background: #00cc99;
+            border: none;
+            border-radius: 4px;
+            color: #000;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #00b386;
+        }
+        #feedback {
+            min-height: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        #progress {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 8px;
+            color: #ccc;
+            text-align: center;
+        }
+        #progress span {
+            color: #00cc99;
+            font-weight: bold;
+        }
+        #soundButton {
+            background: #666;
+            margin-left: 10px;
+        }
+        #soundButton:hover {
+            background: #888;
+        }
+        @media (max-width: 600px) {
+            .fret {
+                width: 50px;
+                height: 25px;
+            }
+            .fret.open {
+                width: 25px;
+                height: 25px;
+            }
+            button {
+                padding: 12px 18px;
+                font-size: 16px;
+            }
+            .options {
+                padding: 10px;
+            }
+            .options label {
+                margin: 5px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Guitar Fretboard Trainer</h1>
+        
+        <div class="options">
+            <h3>Settings</h3>
+            Fret Range: 
+            <input type="number" id="minFret" min="0" max="12" value="0"> to 
+            <input type="number" id="maxFret" min="0" max="12" value="12"><br><br>
+            
+            Strings: 
+            <label><input type="checkbox" class="string" value="0" checked>E (high)</label>
+            <label><input type="checkbox" class="string" value="1" checked>B</label>
+            <label><input type="checkbox" class="string" value="2" checked>G</label>
+            <label><input type="checkbox" class="string" value="3" checked>D</label>
+            <label><input type="checkbox" class="string" value="4" checked>A</label>
+            <label><input type="checkbox" class="string" value="5" checked>E (low)</label><br><br>
+            
+            Note Types:
+            <label><input type="checkbox" id="naturals" checked>Naturals</label>
+            <label><input type="checkbox" id="sharps" checked>Sharps</label>
+            <label><input type="checkbox" id="flats">Flats</label>
+            <label><input type="checkbox" id="sound" checked>Sound</label><br><br>
+            
+            Mode:
+            <label><input type="radio" name="mode" id="noteMode" value="note" checked> Note</label>
+            <label><input type="radio" name="mode" id="triadMode" value="triad"> Triad</label><br>
+            
+            <div id="triadInversions">
+                Inversions:
+                <label><input type="checkbox" id="rootPosition" checked> Root Position</label>
+                <label><input type="checkbox" id="firstInversion" checked> First Inversion</label>
+                <label><input type="checkbox" id="secondInversion" checked> Second Inversion</label>
+            </div>
+        </div>
+
+        <div class="fretboard-container">
+            <div id="fretboard" class="fretboard"></div>
+            <div id="feedback"></div>
+            <button id="soundButton">Play</button>
+        </div>
+
+        <div class="buttons" id="answerButtons"></div>
+        
+        <div id="progress">
+            Correct: <span id="correct">0</span> |
+            Total: <span id="total">0</span> |
+            Percentage: <span id="percentage">0%</span>
+        </div>
+    </div>
+
+    <script>
+        // Global constants
+        const notes = ['C', 'C#/Db', 'D', 'D#/Eb', 'E', 'F', 'F#/Gb', 'G', 'G#/Ab', 'A', 'A#/Bb', 'B'];
+        const stringTunings = ['E', 'B', 'G', 'D', 'A', 'E'];
+        const fretDots = [3, 5, 7, 9, 12];
+        const doubleDot = 12;
+
+        let currentString, currentFret, correctNote, currentChord, correctChordName;
+
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        function loadProgress() {
+            const correct = getCookie('correct') || 0;
+            const total = getCookie('total') || 0;
+            document.getElementById('correct').textContent = correct;
+            document.getElementById('total').textContent = total;
+            updatePercentage(correct, total);
+        }
+
+        function updateProgress(correct) {
+            let correctCount = parseInt(getCookie('correct') || 0);
+            let totalCount = parseInt(getCookie('total') || 0);
+            totalCount++;
+            if (correct) correctCount++;
+            setCookie('correct', correctCount, 30);
+            setCookie('total', totalCount, 30);
+            document.getElementById('correct').textContent = correctCount;
+            document.getElementById('total').textContent = totalCount;
+            updatePercentage(correctCount, totalCount);
+        }
+
+        function updatePercentage(correct, total) {
+            const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
+            document.getElementById('percentage').textContent = `${percentage}%`;
+        }
+
+        function renderFretboard() {
+            const fretboard = document.getElementById('fretboard');
+            fretboard.innerHTML = '';
+            const maxFret = Math.max(12, parseInt(document.getElementById('maxFret').value));
+            const isTriadMode = document.getElementById('triadMode').checked;
+
+            for (let string = 0; string <= 5; string++) { // High E (0) at top, Low E (5) at bottom
+                const stringDiv = document.createElement('div');
+                stringDiv.className = 'string';
+                // Open string (fret 0)
+                const openFret = document.createElement('div');
+                openFret.className = 'fret open';
+                if (isTriadMode && currentChord) {
+                    currentChord.forEach(([s, f]) => {
+                        if (s === string && f === 0) {
+                            openFret.classList.add('active');
+                        }
+                    });
+                } else if (string === currentString && currentFret === 0) {
+                    openFret.classList.add('active');
+                }
+                stringDiv.appendChild(openFret);
+                // Frets 1 and up
+                for (let fret = 1; fret <= maxFret; fret++) {
+                    const fretDiv = document.createElement('div');
+                    fretDiv.className = 'fret';
+                    if (isTriadMode && currentChord) {
+                        currentChord.forEach(([s, f]) => {
+                            if (s === string && f === fret) {
+                                fretDiv.classList.add('active');
+                            }
+                        });
+                    } else if (string === currentString && fret === currentFret) {
+                        fretDiv.classList.add('active');
+                    }
+                    if (string === 2 && fretDots.includes(fret)) {
+                        fretDiv.classList.add('dot');
+                    }
+                    if (string === 2 && fret === doubleDot) {
+                        fretDiv.classList.add('double-dot');
+                    }
+                    stringDiv.appendChild(fretDiv);
+                }
+                fretboard.appendChild(stringDiv);
+            }
+        }
+
+        function getRandomNote() {
+            const minFret = parseInt(document.getElementById('minFret').value);
+            const maxFret = parseInt(document.getElementById('maxFret').value);
+            const selectedStrings = Array.from(document.querySelectorAll('.string:checked'))
+                .map(cb => parseInt(cb.value));
+            
+            if (selectedStrings.length === 0) return alert('Please select at least one string');
+
+            currentString = selectedStrings[Math.floor(Math.random() * selectedStrings.length)];
+            currentFret = Math.floor(Math.random() * (maxFret - minFret + 1)) + minFret;
+            
+            const stringNote = notes.indexOf(stringTunings[currentString]);
+            const noteIndex = (stringNote + currentFret) % 12;
+            correctNote = notes[noteIndex];
+            
+            currentChord = null;
+            renderFretboard();
+            document.getElementById('feedback').textContent = '';
+            generateAnswerButtons();
+        }
+
+        function generateAnswerButtons() {
+            const buttonsDiv = document.getElementById('answerButtons');
+            buttonsDiv.innerHTML = '';
+            const isTriadMode = document.getElementById('triadMode').checked;
+
+            if (isTriadMode) {
+                const options = generateTriadAnswerOptions(correctChordName);
+                options.forEach(chordName => {
+                    const button = document.createElement('button');
+                    button.textContent = chordName;
+                    button.onclick = () => checkAnswer(chordName);
+                    buttonsDiv.appendChild(button);
+                });
+            } else {
+                const naturals = document.getElementById('naturals').checked;
+                const sharps = document.getElementById('sharps').checked;
+                const flats = document.getElementById('flats').checked;
+                
+                let availableNotes = notes.filter(note => {
+                    if (note.includes('/')) {
+                        return (sharps && note.includes('#')) || (flats && note.includes('b'));
+                    }
+                    return naturals;
+                });
+                
+                if (availableNotes.length < 4) availableNotes = notes.slice();
+                
+                const options = new Set([correctNote]);
+                while (options.size < 4 && availableNotes.length > 0) {
+                    const randomNote = availableNotes[Math.floor(Math.random() * availableNotes.length)];
+                    options.add(randomNote);
+                }
+                
+                const buttons = Array.from(options).sort(() => Math.random() - 0.5);
+                buttons.forEach(note => {
+                    const button = document.createElement('button');
+                    button.textContent = note;
+                    button.onclick = () => checkAnswer(note);
+                    buttonsDiv.appendChild(button);
+                });
+            }
+        }
+
+        function checkAnswer(selectedAnswer) {
+            const feedback = document.getElementById('feedback');
+            const isTriadMode = document.getElementById('triadMode').checked;
+            const correctAnswer = isTriadMode ? correctChordName : correctNote;
+
+            if (selectedAnswer === correctAnswer) {
+                feedback.textContent = 'Correct!';
+                feedback.style.color = '#00cc99';
+                playFeedbackSound(true);
+                updateProgress(true);
+                setTimeout(() => {
+                    if (isTriadMode) {
+                        getRandomTriad();
+                    } else {
+                        getRandomNote();
+                    }
+                    if (document.getElementById('sound').checked) playChordOrNote();
+                }, 1000);
+            } else {
+                feedback.textContent = `Wrong! It's ${correctAnswer}`;
+                feedback.style.color = '#ff6666';
+                playFeedbackSound(false);
+                updateProgress(false);
+            }
+        }
+
+        function playChordOrNote() {
+            const isTriadMode = document.getElementById('triadMode').checked;
+            if (isTriadMode && currentChord) {
+                playChord(currentChord);
+            } else if (currentString !== undefined && currentFret !== undefined) {
+                playNote(currentString, currentFret);
+            }
+        }
+
+        // Initialize
+        loadProgress();
+        getRandomNote();
+
+        // Event listeners
+        document.querySelectorAll('input[type="radio"]').forEach(input => {
+            input.addEventListener('change', () => {
+                const isTriadMode = document.getElementById('triadMode').checked;
+                document.getElementById('triadInversions').style.display = isTriadMode ? 'block' : 'none';
+                if (isTriadMode) {
+                    getRandomTriad();
+                } else {
+                    getRandomNote();
+                }
+            });
+        });
+
+        document.querySelectorAll('input:not([type="radio"])').forEach(input => {
+            input.addEventListener('change', () => {
+                const isTriadMode = document.getElementById('triadMode').checked;
+                if (isTriadMode) {
+                    getRandomTriad();
+                } else {
+                    getRandomNote();
+                }
+            });
+        });
+
+        document.getElementById('soundButton').addEventListener('click', playChordOrNote);
+    </script>
+    <script src="sound.js"></script>
+    <script src="triads.js"></script>
+</body>
+</html>
