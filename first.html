@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Guitar Fretboard Trainer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+        h1 {
+            color: #00cc99;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .options {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .options label {
+            margin: 0 10px;
+            color: #ccc;
+        }
+        .options input[type="number"] {
+            width: 50px;
+            padding: 5px;
+            border: none;
+            border-radius: 4px;
+            background: #404040;
+            color: #fff;
+        }
+        .fretboard-container {
+            background: #252525;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .fretboard {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #333;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .string {
+            display: flex;
+            gap: 2px;
+        }
+        .fret {
+            width: 40px;
+            height: 20px;
+            background: #555;
+            border: 1px solid #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .fret.active {
+            background: #00cc99;
+            color: #000;
+            font-weight: bold;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            background: #00cc99;
+            border: none;
+            border-radius: 4px;
+            color: #000;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #00b386;
+        }
+        #feedback {
+            color: #ff6666;
+            min-height: 20px;
+        }
+        #progress {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 8px;
+            color: #ccc;
+        }
+        #progress span {
+            color: #00cc99;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Guitar Fretboard Trainer</h1>
+        
+        <div class="options">
+            <h3>Settings</h3>
+            Fret Range: 
+            <input type="number" id="minFret" min="0" max="12" value="0"> to 
+            <input type="number" id="maxFret" min="0" max="12" value="12"><br><br>
+            
+            Strings: 
+            <label><input type="checkbox" class="string" value="0" checked>E</label>
+            <label><input type="checkbox" class="string" value="1" checked>B</label>
+            <label><input type="checkbox" class="string" value="2" checked>G</label>
+            <label><input type="checkbox" class="string" value="3" checked>D</label>
+            <label><input type="checkbox" class="string" value="4" checked>A</label>
+            <label><input type="checkbox" class="string" value="5" checked>E</label><br><br>
+            
+            Note Types:
+            <label><input type="checkbox" id="naturals" checked>Naturals</label>
+            <label><input type="checkbox" id="sharps" checked>Sharps</label>
+            <label><input type="checkbox" id="flats">Flats</label>
+        </div>
+
+        <div class="fretboard-container">
+            <div id="fretboard" class="fretboard"></div>
+            <div id="feedback"></div>
+        </div>
+
+        <div class="buttons" id="answerButtons"></div>
+        
+        <div id="progress">
+            Correct: <span id="correct">0</span> |
+            Total: <span id="total">0</span> |
+            Percentage: <span id="percentage">0%</span>
+        </div>
+    </div>
+
+    <script>
+        const notes = ['C', 'C#/Db', 'D', 'D#/Eb', 'E', 'F', 'F#/Gb', 'G', 'G#/Ab', 'A', 'A#/Bb', 'B'];
+        const stringTunings = ['E', 'B', 'G', 'D', 'A', 'E'];
+        let currentString, currentFret, correctNote;
+
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+        }
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        function loadProgress() {
+            const correct = getCookie('correct') || 0;
+            const total = getCookie('total') || 0;
+            document.getElementById('correct').textContent = correct;
+            document.getElementById('total').textContent = total;
+            updatePercentage(correct, total);
+        }
+
+        function updateProgress(correct) {
+            let correctCount = parseInt(getCookie('correct') || 0);
+            let totalCount = parseInt(getCookie('total') || 0);
+            totalCount++;
+            if (correct) correctCount++;
+            
+            setCookie('correct', correctCount, 30);
+            setCookie('total', totalCount, 30);
+            
+            document.getElementById('correct').textContent = correctCount;
+            document.getElementById('total').textContent = totalCount;
+            updatePercentage(correctCount, totalCount);
+        }
+
+        function updatePercentage(correct, total) {
+            const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
+            document.getElementById('percentage').textContent = `${percentage}%`;
+        }
+
+        function renderFretboard() {
+            const fretboard = document.getElementById('fretboard');
+            fretboard.innerHTML = '';
+            const maxFret = parseInt(document.getElementById('maxFret').value);
+
+            for (let string = 0; string < 6; string++) {
+                const stringDiv = document.createElement('div');
+                stringDiv.className = 'string';
+                
+                for (let fret = 0; fret <= maxFret; fret++) {
+                    const fretDiv = document.createElement('div');
+                    fretDiv.className = 'fret';
+                    if (string === currentString && fret === currentFret) {
+                        fretDiv.classList.add('active');
+                    }
+                    stringDiv.appendChild(fretDiv);
+                }
+                fretboard.appendChild(stringDiv);
+            }
+        }
+
+        function getRandomNote() {
+            const minFret = parseInt(document.getElementById('minFret').value);
+            const maxFret = parseInt(document.getElementById('maxFret').value);
+            const selectedStrings = Array.from(document.querySelectorAll('.string:checked'))
+                .map(cb => parseInt(cb.value));
+            
+            if (selectedStrings.length === 0) return alert('Please select at least one string');
+
+            currentString = selectedStrings[Math.floor(Math.random() * selectedStrings.length)];
+            currentFret = Math.floor(Math.random() * (maxFret - minFret + 1)) + minFret;
+            
+            const stringNote = notes.indexOf(stringTunings[currentString]);
+            const noteIndex = (stringNote + currentFret) % 12;
+            correctNote = notes[noteIndex];
+            
+            renderFretboard();
+            document.getElementById('feedback').textContent = '';
+            generateAnswerButtons();
+        }
+
+        function generateAnswerButtons() {
+            const buttonsDiv = document.getElementById('answerButtons');
+            buttonsDiv.innerHTML = '';
+            
+            const naturals = document.getElementById('naturals').checked;
+            const sharps = document.getElementById('sharps').checked;
+            const flats = document.getElementById('flats').checked;
+            
+            let availableNotes = notes.filter(note => {
+                if (note.includes('/')) {
+                    return (sharps && note.includes('#')) || (flats && note.includes('b'));
+                }
+                return naturals;
+            });
+            
+            if (availableNotes.length < 4) availableNotes = notes.slice();
+            
+            const options = new Set([correctNote]);
+            while (options.size < 4 && availableNotes.length > 0) {
+                const randomNote = availableNotes[Math.floor(Math.random() * availableNotes.length)];
+                options.add(randomNote);
+            }
+            
+            const buttons = Array.from(options).sort(() => Math.random() - 0.5);
+            buttons.forEach(note => {
+                const button = document.createElement('button');
+                button.textContent = note;
+                button.onclick = () => checkAnswer(note);
+                buttonsDiv.appendChild(button);
+            });
+        }
+
+        function checkAnswer(selectedNote) {
+            const feedback = document.getElementById('feedback');
+            if (selectedNote === correctNote) {
+                feedback.textContent = 'Correct!';
+                updateProgress(true);
+                setTimeout(getRandomNote, 1000);
+            } else {
+                feedback.textContent = `Wrong! It's ${correctNote}`;
+                updateProgress(false);
+            }
+        }
+
+        // Initialize
+        loadProgress();
+        getRandomNote();
+
+        // Update settings on change
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('change', getRandomNote);
+        });
+    </script>
+</body>
+</html>
