@@ -1,89 +1,118 @@
-const openStringFreqs = [
-    329.63, // string 0: E4 (high E)
-    246.94, // string 1: B3
-    196.00, // string 2: G3
-    146.83, // string 3: D3
-    110.00, // string 4: A2
-    82.41   // string 5: E2 (low E)
-];
+const openStringFreqs = [329.63, 246.94, 196.00, 146.83, 110.00, 82.41];
 
 function playNote(string, fret) {
-    if (!document.getElementById('sound').checked) return;
-
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const filter = audioContext.createBiquadFilter();
-    const gainNode = audioContext.createGain();
-
-    oscillator.type = 'sawtooth';
-    const baseFreq = openStringFreqs[string];
-    const freq = baseFreq * Math.pow(2, fret / 12);
-    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(1200, audioContext.currentTime);
-    filter.Q.setValueAtTime(1, audioContext.currentTime);
-
-    const attackTime = 0.01;
-    const decayTime = 1.5;
-    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0.7, audioContext.currentTime + attackTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + decayTime);
-
-    oscillator.connect(filter);
-    filter.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + decayTime);
-}
-
-function playChord(chord) {
-    if (!document.getElementById('sound').checked) return;
-
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    chord.forEach(([string, fret]) => {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const oscillator = audioContext.createOscillator();
         const filter = audioContext.createBiquadFilter();
         const gainNode = audioContext.createGain();
 
+        // More guitar-like settings
         oscillator.type = 'sawtooth';
         const baseFreq = openStringFreqs[string];
         const freq = baseFreq * Math.pow(2, fret / 12);
         oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
 
+        // Add filter for more natural guitar sound
         filter.type = 'lowpass';
         filter.frequency.setValueAtTime(1200, audioContext.currentTime);
-        filter.Q.setValueAtTime(1, audioContext.currentTime);
+        filter.Q.value = 0.5;
 
+        // Shape the envelope like a plucked string
         const attackTime = 0.01;
         const decayTime = 1.5;
+        
         gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + attackTime);
+        gainNode.gain.linearRampToValueAtTime(0.7, audioContext.currentTime + attackTime);
         gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + decayTime);
 
+        // Connect the nodes
         oscillator.connect(filter);
         filter.connect(gainNode);
         gainNode.connect(audioContext.destination);
 
         oscillator.start();
         oscillator.stop(audioContext.currentTime + decayTime);
-    });
+    } catch (error) {
+        console.error('Error playing note:', error);
+    }
+}
+
+function playChord(positions) {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Create a chord envelope shared by all notes
+        const masterGain = audioContext.createGain();
+        masterGain.connect(audioContext.destination);
+        
+        // Set up the shared envelope
+        const attackTime = 0.01;
+        const decayTime = 1.5;
+        
+        masterGain.gain.setValueAtTime(0, audioContext.currentTime);
+        masterGain.gain.linearRampToValueAtTime(0.7, audioContext.currentTime + attackTime);
+        masterGain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + decayTime);
+        
+        // Play all notes at once
+        positions.forEach(([string, fret]) => {
+            const oscillator = audioContext.createOscillator();
+            const filter = audioContext.createBiquadFilter();
+            
+            oscillator.type = 'sawtooth';
+            const baseFreq = openStringFreqs[string];
+            const freq = baseFreq * Math.pow(2, fret / 12);
+            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(1200, audioContext.currentTime);
+            filter.Q.value = 0.5;
+            
+            oscillator.connect(filter);
+            filter.connect(masterGain);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + decayTime);
+        });
+    } catch (error) {
+        console.error('Error playing chord:', error);
+    }
 }
 
 function playFeedbackSound(isCorrect) {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+    if (isCorrect) {
+        playTone(880, 0.15);
+        setTimeout(() => playTone(1318.51, 0.25), 150);
+    } else {
+        playTone(349.23, 0.15);
+        setTimeout(() => playTone(329.63, 0.3), 150);
+    }
+}
 
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(isCorrect ? 800 : 400, audioContext.currentTime);
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+function playTone(frequency, duration) {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.type = 'triangle';
+        oscillator.frequency.value = frequency;
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+        gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + duration * 0.75);
+        gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
+        
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + duration);
+    } catch (error) {
+        console.error('Error playing tone:', error);
+    }
+}
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.5);
+function calculateNoteFrequency(string, fret) {
+    const openStringFrequencies = [82.41, 110.00, 146.83, 196.00, 246.94, 329.63];
+    return openStringFrequencies[string] * Math.pow(2, fret / 12);
 }
