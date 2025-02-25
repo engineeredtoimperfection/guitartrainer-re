@@ -258,21 +258,10 @@
             const currentType = symbolMap[typeSymbol];
             
             while (options.size < 4) {
-                // Randomly decide whether to change the root or the type
-                const changeRoot = Math.random() > 0.5;
-                
-                if (changeRoot) {
-                    // Get a random note different from the current root
-                    const randomRoot = notes[Math.floor(Math.random() * notes.length)];
-                    if (randomRoot !== root) {
-                        options.add(`${randomRoot}${typeSymbol}${inversion}`);
-                    }
-                } else {
-                    // Get a random triad type different from the current type
-                    const randomType = availableTriadTypes[Math.floor(Math.random() * availableTriadTypes.length)];
-                    if (randomType !== currentType) {
-                        options.add(`${root}${triads[randomType].symbol}${inversion}`);
-                    }
+            
+                const randomRoot = notes[Math.floor(Math.random() * notes.length)];
+                if (randomRoot !== root) {
+                    options.add(`${randomRoot}${typeSymbol}${inversion}`);      
                 }
             }
             
