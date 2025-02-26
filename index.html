@@ -73,13 +73,27 @@
             <h3>How to Use <button id="instructions-close" class="instructions-close">X</button></h3>
             <div class="instructions-content">
                 <p><strong>Goal:</strong> Learn the notes on the guitar fretboard.</p>
+                
+                <div class="feature-highlight">
+                    <p><span class="tip-icon">💡</span> <strong>Key Controls:</strong></p>
+                    <ul>
+                        <li>Press <kbd>Spacebar</kbd> to play the current note</li>
+                        <li>Click the <strong>🔊</strong> button to hear the note</li>
+                    </ul>
+                </div>
+                
                 <ul>
                     <li>A note is highlighted on the fretboard.</li>
                     <li>Select the correct note name from the answer buttons.</li>
-                    <li>Use the settings to customize your practice.</li>
-                    <li>Click the Play button or press <kbd>Spacebar</kbd> to hear the note.</li>
+                    <li>Your score is tracked at the bottom of the screen.</li>
                 </ul>
-                <p><strong>Circle of Fifths:</strong> Click on the sharps/flats (red border) to toggle between sharp (♯) and flat (♭) notation.</p>
+                
+                <div class="feature-highlight">
+                    <p><span class="tip-icon">🎵</span> <strong>Change Sharp/Flat Display:</strong></p>
+                    <p>Look for the <strong>Circle of Fifths</strong> in the bottom-right corner. Click on any note with a <span style="color:#ff6666">red border</span> to toggle between sharp (♯) and flat (♭) notation (e.g., C♯/D♭).</p>
+                </div>
+                
+                <p><strong>Settings:</strong> Customize your practice by changing the options in the settings panel at the top.</p>
             </div>
         </div>
 
@@ -104,6 +118,12 @@
         <div id="circle-of-fifths-tooltip">
             <h3 id="cof-header">Circle of Fifths <button id="toggle-cof"></button></h3>
             <div class="circle-container" id="circle-container"></div>
+        </div>
+
+        <div class="theme-toggle-container">
+            <button id="theme-toggle" class="theme-toggle" title="Toggle Light/Dark Mode">
+                <span class="theme-icon">��</span>
+            </button>
         </div>
     </div>
 
@@ -180,18 +200,59 @@
         }
 
         function getRandomNote() {
+            // First, get the filtered note pool based on study mode
+            const notePool = noteUtils.getNotesForStudyMode();
+            console.log("Note pool from study mode:", notePool);
+            
+            // Get fret range and selected strings
             const minFret = parseInt(document.getElementById('minFret').value);
             const maxFret = parseInt(document.getElementById('maxFret').value);
             const strings = Array.from(document.querySelectorAll('.string:checked')).map(cb => parseInt(cb.value));
+            
             if (strings.length === 0) {
                 alert('Please select at least one string.');
                 document.querySelector('.string[value="0"]').checked = true;
                 strings.push(0);
             }
-            currentString = strings[Math.floor(Math.random() * strings.length)];
-            currentFret = Math.floor(Math.random() * (maxFret - minFret + 1)) + minFret;
-            const noteIndex = (notes.indexOf(stringTunings[currentString]) + currentFret) % 12;
+            
+            // Find all valid positions that produce notes from our filtered pool
+            const validPositions = [];
+            
+            for (let stringIndex of strings) {
+                const stringNote = stringTunings[stringIndex];
+                const stringNoteIndex = notes.indexOf(stringNote);
+                
+                for (let fret = minFret; fret <= maxFret; fret++) {
+                    const noteIndex = (stringNoteIndex + fret) % 12;
+                    const noteAtPosition = notes[noteIndex];
+                    
+                    // Check if this note is in our filtered pool or equivalent to one in the pool
+                    if (notePool.includes(noteAtPosition) || 
+                        notePool.some(note => noteUtils.areEquivalent(note, noteAtPosition))) {
+                        validPositions.push({string: stringIndex, fret: fret});
+                    }
+                }
+            }
+            
+            if (validPositions.length === 0) {
+                alert("No notes matching your study mode can be found in the current fret range. Adjusting settings...");
+                // Reset to all notes if we can't find anything
+                document.getElementById('naturalNotesOnly').checked = false;
+                document.getElementById('accidentalsOnly').checked = false;
+                getRandomNote();
+                return;
+            }
+            
+            // Pick a random valid position
+            const randomPosition = validPositions[Math.floor(Math.random() * validPositions.length)];
+            currentString = randomPosition.string;
+            currentFret = randomPosition.fret;
+            
+            // Get the canonical form of the note at this position
+            const stringNoteIndex = notes.indexOf(stringTunings[currentString]);
+            const noteIndex = (stringNoteIndex + currentFret) % 12;
             correctNote = notes[noteIndex];
+            
             renderFretboard();
             document.getElementById('feedback').textContent = '';
             generateAnswerButtons();
@@ -222,8 +283,38 @@
             // Get available notes based on study mode
             const notePool = noteUtils.getNotesForStudyMode();
             
-            // Generate choices with preferences applied
-            return noteUtils.generateAnswerChoices(canonicalCorrect);
+            // CRITICAL FIX: Check if the correct note is actually in the study pool
+            // If not, we need to select a new correct note from the pool
+            if (!notePool.includes(canonicalCorrect) && 
+                !notePool.some(note => noteUtils.areEquivalent(note, canonicalCorrect))) {
+                // The correct note isn't in our study pool! Get a new one from the pool
+                const randomIndex = Math.floor(Math.random() * notePool.length);
+                correctNote = notePool[randomIndex];
+                
+                // Update global correct note
+                window.correctNote = correctNote;
+                
+                // Reposition on fretboard
+                const stringFretCombinations = findNoteLocations(correctNote);
+                const position = selectRandomLocation(stringFretCombinations);
+                currentString = position.string;
+                currentFret = position.fret;
+                renderFretboard();
+            }
+            
+            // Create answer choices using the filtered note pool
+            let choices = [canonicalCorrect]; // Start with correct answer
+            
+            // Add random incorrect answers from the note pool
+            while (choices.length < 4) {
+                const randomNote = notePool[Math.floor(Math.random() * notePool.length)];
+                if (!choices.some(note => noteUtils.areEquivalent(note, randomNote))) {
+                    choices.push(randomNote);
+                }
+            }
+            
+            // Shuffle and apply display preferences 
+            return noteUtils.shuffleArray(choices).map(note => noteUtils.getDisplayPreference(note));
         }
 
         function generateTriadAnswerOptions(correctChord) {
@@ -587,7 +678,16 @@
             
             if (!document.getElementById('triadMode').checked) {
                 // Single note mode
-                const fretElement = document.querySelector(`.string[data-string="${currentString}"] [data-fret="${currentFret}"]`);
+                let fretElement;
+                
+                if (currentFret === 0) {
+                    // For open string in single note mode
+                    fretElement = document.querySelector(`.string[data-string="${currentString}"] .fret.open`);
+                } else {
+                    // For regular frets in single note mode
+                    fretElement = document.querySelector(`.string[data-string="${currentString}"] .fret[data-fret="${currentFret}"]`);
+                }
+                
                 if (fretElement) {
                     showNoteNameOnElement(fretElement, currentString, currentFret);
                 }
@@ -598,10 +698,10 @@
                     let fretElement;
                     
                     if (fret === 0) {
-                        // For open strings
-                        fretElement = document.querySelector(`.string[data-string="${string}"] .open`);
+                        // For open strings in triad mode
+                        fretElement = document.querySelector(`.string[data-string="${string}"] .fret.open`);
                     } else {
-                        // For regular frets
+                        // For regular frets in triad mode
                         fretElement = document.querySelector(`.string[data-string="${string}"] .fret[data-fret="${fret}"]`);
                     }
                     

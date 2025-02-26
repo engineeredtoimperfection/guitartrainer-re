@@ -1,12 +1,39 @@
+:root {
+    /* Default dark theme colors */
+    --bg-color: #1a1a1a;
+    --text-color: #ffffff;
+    --secondary-text: #cccccc;
+    --accent-color: #00cc99;
+    --fret-color: rgba(85, 85, 85, 0.8);
+    --border-color: rgba(255, 255, 255, 0.3);
+    --button-text: #000000;
+    --input-bg: #404040;
+    --tooltip-bg: rgba(45, 45, 45, 0.8);
+}
+
+/* Light theme colors with improved text contrast */
+[data-theme="light"] {
+    --bg-color: #f5f5f5;
+    --text-color: #222222; /* Darker text for better contrast */
+    --secondary-text: #444444; /* Darker secondary text */
+    --accent-color: #008866; /* Slightly darker accent color for better contrast */
+    --fret-color: rgba(200, 200, 200, 0.8);
+    --border-color: rgba(0, 0, 0, 0.3);
+    --button-text: #ffffff;
+    --input-bg: #ffffff;
+    --tooltip-bg: rgba(240, 240, 240, 0.9);
+}
+
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
     margin: 0;
     padding: 20px;
-    background: #1a1a1a;
-    color: #ffffff;
+    background: var(--bg-color);
+    color: var(--text-color);
     display: flex;
     flex-direction: column;
     align-items: center;
+    transition: background-color 0.3s, color 0.3s;
 }
 .string {
     display: flex;
@@ -22,8 +49,8 @@ body {
     flex: 1;
     min-width: 45px;
     height: 100%;
-    background: rgba(85, 85, 85, 0.8);
-    border-right: 2px solid rgba(255, 255, 255, 0.3);
+    background: var(--fret-color);
+    border-right: 2px solid var(--border-color);
     box-shadow: 1px 0 2px rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
@@ -80,7 +107,7 @@ body {
     padding: 0 10px;
 }
 h1 {
-    color: #00cc99;
+    color: var(--accent-color);
     text-align: center;
     margin-bottom: 20px;
 }
@@ -89,7 +116,7 @@ h1 {
     border-radius: 8px;
     margin-bottom: 20px;
     position: relative;
-    color: #ccc;
+    color: var(--secondary-text);
     line-height: 1.5;
 }
 .options h3 {
@@ -100,7 +127,7 @@ h1 {
 }
 .options label {
     margin: 0 10px;
-    color: #ccc;
+    color: var(--secondary-text);
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -110,8 +137,8 @@ h1 {
     padding: 5px;
     border: none;
     border-radius: 4px;
-    background: #404040;
-    color: #fff;
+    background: var(--input-bg);
+    color: var(--text-color);
 }
 #sound-control {
     position: absolute;
@@ -194,7 +221,7 @@ button:hover {
 #progress {
     padding: 15px;
     border-radius: 8px;
-    color: #ccc;
+    color: var(--secondary-text);
     text-align: center;
 }
 #progress span {
@@ -246,7 +273,7 @@ button:hover {
     border-radius: 8px;
     padding: 0;
     z-index: 999;
-    color: #ccc;
+    color: var(--secondary-text);
     font-size: 14px;
     display: flex;
     flex-direction: column;
@@ -262,7 +289,7 @@ button:hover {
     transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
     max-height: 220px;
     opacity: 1;
-    background: rgba(45, 45, 45, 0.8);
+    background: var(--tooltip-bg);
     border-radius: 0 0 8px 8px;
     padding: 10px;
 }
@@ -277,11 +304,11 @@ button:hover {
 #cof-header {
     margin: 0;
     padding: 12px 40px 12px 12px;
-    color: #00cc99;
+    color: #006644;
     text-align: left;
     position: relative;
     cursor: pointer;
-    background: rgba(45, 45, 45, 0.8);
+    background: rgba(200, 200, 200, 0.8);
     border-radius: 8px 8px 0 0;
     border-bottom: 1px solid #444;
 }
@@ -302,12 +329,12 @@ button:hover {
     text-align: center;
     line-height: 30px;
     border-radius: 50%;
-    background: #404040;
-    color: #fff;
+    background: #e0e0e0;
+    color: #222222;
     font-size: 14px;
     transform: translate(-50%, -50%);
     cursor: pointer;
-    border: 2px solid #00cc99;
+    border: 2px solid #008866;
     transition: background 0.2s;
 }
 .circle-key:hover {
@@ -431,70 +458,81 @@ html, body {
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
 }
 
+/* Fix instructions tooltip contrast in both themes */
 .instructions-tooltip {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 320px;
-    max-width: 90vw;
-    max-height: 80vh;
-    background: #2d2d2d;
-    border-radius: 8px;
-    padding: 0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     z-index: 1001;
-    color: #ccc;
-    font-size: 14px;
-    display: flex;
-    flex-direction: column;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 90%;
+    width: 450px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
 }
 
-.instructions-tooltip h3 {
-    margin: 0;
-    padding: 12px;
-    color: #00cc99;
-    text-align: center;
-    position: relative;
-    border-bottom: 1px solid #444;
+/* Light mode specific styling */
+[data-theme="light"] .instructions-tooltip {
+    background-color: rgba(255, 255, 255, 0.97);
+    color: #222222;
+    border: 1px solid #dddddd;
 }
 
-.instructions-content {
-    padding: 15px;
-    overflow-y: auto;
-    max-height: 60vh;
+/* Dark mode specific styling */
+[data-theme="dark"] .instructions-tooltip {
+    background-color: rgba(40, 44, 52, 0.97);
+    color: #f0f0f0;
+    border: 1px solid #555555;
 }
 
-.instructions-tooltip ul {
-    padding-left: 20px;
-    margin-bottom: 15px;
+/* Make instruction headings match the theme */
+[data-theme="light"] .instructions-tooltip h3 {
+    color: var(--accent-color);
+    border-bottom: 1px solid #dddddd;
 }
 
-.instructions-tooltip li {
-    margin-bottom: 8px;
-    line-height: 1.4;
+[data-theme="dark"] .instructions-tooltip h3 {
+    color: var(--accent-color);
+    border-bottom: 1px solid #555555;
 }
 
-.instructions-close {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: #ccc;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 5px;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* Style keyboard shortcuts to stand out */
+.instructions-tooltip kbd {
+    display: inline-block;
+    padding: 3px 6px;
+    font-family: monospace;
+    line-height: 1;
+    background-color: #f1f1f1;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+    margin: 0 2px;
 }
 
-.instructions-close:hover {
-    color: #00cc99;
+/* Dark mode kbd */
+[data-theme="dark"] .instructions-tooltip kbd {
+    background-color: #444;
+    color: #eee;
+    border-color: #666;
+}
+
+/* Make important features highlighted */
+.feature-highlight {
+    background-color: rgba(0, 204, 153, 0.1);
+    border-left: 3px solid var(--accent-color);
+    padding: 8px 12px;
+    margin: 10px 0;
+    font-weight: 500;
+}
+
+/* Make the tip icons stand out */
+.tip-icon {
+    color: var(--accent-color);
+    font-weight: bold;
+    margin-right: 5px;
 }
 
 .hidden {
@@ -695,7 +733,7 @@ html, body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.8);
     color: white;
     padding: 2px 4px;
     border-radius: 3px;
@@ -705,10 +743,10 @@ html, body {
     pointer-events: none;
 }
 
-/* Make the note display more visible on open strings */
-.open .note-display {
+/* Make the note display more readable in light mode */
+[data-theme="light"] .note-display {
     background: rgba(0, 0, 0, 0.8);
-    color: #00cc99;
+    color: white;
 }
 
 /* Enhanced answer choice buttons */
@@ -790,4 +828,285 @@ html, body {
     gap: 10px;
     margin: 0;
     padding: 0;
+}
+
+/* Position the theme toggle next to the instructions button */
+.theme-toggle-container {
+    position: absolute;
+    top: 20px;
+    right: 70px; /* Position it to the left of the help button */
+    z-index: 1000;
+}
+
+.theme-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    color: var(--button-text);
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+}
+
+.theme-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Ensure instructions text is readable in light mode */
+[data-theme="light"] .instructions-content {
+    color: #222222;
+}
+
+/* Ensure feedback is visible in both modes */
+#feedback {
+    color: var(--text-color);
+}
+
+/* Fix answer button contrast in light mode */
+[data-theme="light"] .buttons button {
+    /* Make the background darker and more opaque in light mode */
+    background: linear-gradient(135deg, 
+                rgba(0, 136, 102, 0.8) 0%, 
+                rgba(0, 136, 102, 0.7) 50%, 
+                rgba(0, 136, 102, 0.9) 100%);
+    
+    /* Keep text white for good contrast */
+    color: #ffffff;
+    
+    /* Improve text readability */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    
+    /* Slightly darker border */
+    border-color: #007755;
+}
+
+/* Adjust hover state in light mode */
+[data-theme="light"] .buttons button:hover {
+    background: linear-gradient(135deg, 
+                rgba(0, 153, 115, 0.9) 0%, 
+                rgba(0, 153, 115, 0.8) 50%, 
+                rgba(0, 153, 115, 1) 100%);
+    border-color: #008866;
+}
+
+/* Ensure other button types remain readable too */
+[data-theme="light"] button {
+    background: var(--accent-color);
+    color: #ffffff;
+}
+
+/* Make sure the reset button remains distinct */
+[data-theme="light"] #reset-score {
+    background: #ff6666;
+    color: #ffffff;
+}
+
+/* Ensure the sound button remains visible */
+[data-theme="light"] #soundButton {
+    background: rgba(0, 0, 0, 0.7);
+    color: var(--accent-color);
+    border-color: rgba(255, 255, 255, 0.9);
+}
+
+/* Make fret dots more visible in light mode */
+[data-theme="light"] .dot {
+    background: rgba(80, 80, 80, 0.8);  /* Darker gray, more opaque */
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.7), 
+                inset 0 0 2px rgba(255, 255, 255, 0.5);  /* Stronger shadow */
+    border: 1px solid rgba(40, 40, 40, 0.8);  /* Dark border */
+}
+
+/* Make sure the hover effects on frets stay readable in light mode too */
+[data-theme="light"] .fret:hover {
+    background: rgba(0, 136, 102, 0.2);  /* Lighter teal but still visible */
+}
+
+/* Make string color more visible in light mode */
+[data-theme="light"] .string {
+    opacity: 0.95;  /* Less transparent */
+}
+
+/* Special styling for the fret nut in light mode */
+[data-theme="light"] .fret[data-fret="0"] {
+    border-right-color: rgba(0, 0, 0, 0.7);  /* Darker nut border */
+}
+
+[data-theme="light"] .fret[data-fret="0"]::after {
+    background: rgba(0, 0, 0, 0.9);  /* Darker nut line */
+}
+
+/* Make theme toggle and help button square with outlines */
+.theme-toggle-container,
+.help-container {
+    position: absolute;
+    top: 20px;
+    z-index: 1000;
+}
+
+.theme-toggle-container {
+    right: 70px;
+}
+
+.help-container {
+    right: 20px;
+}
+
+/* Target both buttons with square outline style */
+.theme-toggle,
+#help-button {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 6px !important; /* More square with slightly rounded corners */
+    background: transparent !important; /* Transparent background */
+    border: 2px solid var(--accent-color) !important; /* Accent colored border */
+    color: var(--text-color) !important; /* Text color matches theme text */
+    cursor: pointer;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: none !important; /* Remove shadow for cleaner look */
+    transition: all 0.2s !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+}
+
+/* Hover states */
+.theme-toggle:hover,
+#help-button:hover,
+.theme-toggle:active,
+#help-button:active,
+.theme-toggle:focus,
+#help-button:focus {
+    background: rgba(0, 204, 153, 0.1) !important; /* Very subtle background on hover */
+    color: var(--accent-color) !important; /* Text changes to accent color on hover */
+    transform: translateY(-2px) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    outline: none !important;
+}
+
+/* Ensure the moon icon and question mark are centered */
+.theme-icon,
+#help-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Adjust the icon to match theme color */
+.theme-icon {
+    color: inherit;
+}
+
+/* Dark mode Circle of Fifths */
+[data-theme="dark"] #circle-of-fifths-tooltip {
+    background: transparent;
+}
+
+[data-theme="dark"] #cof-header {
+    background: rgba(40, 40, 40, 0.9);
+    color: var(--accent-color);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .circle-container {
+    background: rgba(25, 25, 25, 0.9);
+}
+
+[data-theme="dark"] .circle-key {
+    background: rgba(45, 45, 45, 0.9);
+    color: #ffffff;
+    border: 2px solid var(--accent-color);
+}
+
+[data-theme="dark"] .circle-key.highlight {
+    background: var(--accent-color);
+    color: #000000;
+}
+
+/* Ensure the theme icon is perfectly centered */
+.theme-icon {
+    font-size: 20px;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Fix instructions tooltip contrast in light mode */
+[data-theme="light"] #instructions-tooltip {
+    color: #333333; /* Dark text for light background */
+    background-color: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    border: 1px solid #cccccc;
+}
+
+/* And ensure contrast in dark mode as well */
+[data-theme="dark"] #instructions-tooltip {
+    color: #eeeeee; /* Light text for dark background */
+    background-color: rgba(40, 44, 52, 0.95);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    border: 1px solid #555555;
+}
+
+/* Make sure links in the tooltip are also properly visible */
+[data-theme="light"] #instructions-tooltip a {
+    color: #006644;
+}
+
+[data-theme="dark"] #instructions-tooltip a {
+    color: #00cc99;
+}
+
+/* Position the close button in the top-right corner */
+.instructions-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    color: var(--accent-color);
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 5px 8px;
+    border-radius: 4px;
+    line-height: 1;
+    transition: all 0.2s;
+}
+
+.instructions-close:hover {
+    background: rgba(0, 204, 153, 0.2);
+    transform: scale(1.1);
+}
+
+/* Ensure the heading has enough space for the X button */
+.instructions-tooltip h3 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0;
+    padding-bottom: 8px;
+}
+
+/* Fix for accidental notes in dark mode */
+[data-theme="dark"] .circle-key.sharp-flat {
+    border-color: #ff6666;
+    border-width: 2px;
+}
+
+/* And ensure light mode has the same styling */
+[data-theme="light"] .circle-key.sharp-flat {
+    border-color: #ff6666;
+    border-width: 2px;
 }
