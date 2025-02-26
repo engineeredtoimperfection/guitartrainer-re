@@ -128,14 +128,17 @@
             <button id="reset-score">Reset Score</button>
         </div>
 
-        <div id="circle-of-fifths-tooltip">
-            <h3 id="cof-header">Circle of Fifths <button id="toggle-cof"></button></h3>
+        <div id="circle-of-fifths-tooltip" class="hidden">
+            <h3 id="cof-header">Circle of Fifths <button id="toggle-cof">X</button></h3>
             <div class="circle-container" id="circle-container"></div>
         </div>
 
         <div class="theme-toggle-container">
             <button id="theme-toggle" class="theme-toggle" title="Toggle Light/Dark Mode">
-                <span class="theme-icon">��</span>
+                <span class="theme-icon">🌕</span>
+            </button>
+            <button id="cof-toggle-button" class="theme-toggle" title="Show Circle of Fifths (Press C)">
+                <span class="cof-icon">🎵</span>
             </button>
         </div>
 
@@ -613,35 +616,88 @@
                 }
             });
             
-            // Prevent dragging of the Circle of Fifths
-            const cofHeader = document.getElementById('cof-header');
+            // Clean Circle of Fifths implementation
+            console.log('Setting up Circle of Fifths...');
             
-            // Remove any existing mousedown event listeners
-            const clonedHeader = cofHeader.cloneNode(true);
-            cofHeader.parentNode.replaceChild(clonedHeader, cofHeader);
-            
-            // Add toggle functionality only (no dragging)
-            document.getElementById('toggle-cof').addEventListener('click', function(event) {
-                event.stopPropagation(); // Prevent the header click from triggering
-                const tooltip = document.getElementById('circle-of-fifths-tooltip');
-                tooltip.classList.toggle('collapsed');
-                setCookie('cof-collapsed', tooltip.classList.contains('collapsed'), 30);
-            });
-            
-            // Only allow click to expand/collapse
-            clonedHeader.addEventListener('click', function() {
-                const tooltip = document.getElementById('circle-of-fifths-tooltip');
-                tooltip.classList.toggle('collapsed');
-                setCookie('cof-collapsed', tooltip.classList.contains('collapsed'), 30);
-            });
-            
-            // Make sure position is fixed
+            // Get elements
             const cofTooltip = document.getElementById('circle-of-fifths-tooltip');
+            const cofToggleButton = document.getElementById('cof-toggle-button');
+            const cofCloseButton = document.getElementById('toggle-cof');
+            
+            // Important: Remove any inline styles that might be conflicting
             if (cofTooltip) {
-                cofTooltip.style.position = 'fixed';
-                cofTooltip.style.bottom = '20px';
-                cofTooltip.style.right = '20px';
+                cofTooltip.removeAttribute('style');
+                cofTooltip.classList.add('hidden');
             }
+            
+            // Toggle function
+            function toggleCoF(event) {
+                if (event) {
+                    event.stopPropagation();
+                }
+                
+                const isHidden = cofTooltip.classList.contains('hidden');
+                console.log('Toggling Circle of Fifths, currently hidden:', isHidden);
+                
+                if (isHidden) {
+                    // Show it
+                    cofTooltip.classList.remove('hidden');
+                    
+                    // Render the content
+                    setTimeout(function() {
+                        if (typeof renderCircleOfFifths === 'function') {
+                            console.log('Rendering Circle of Fifths');
+                            renderCircleOfFifths();
+                        }
+                    }, 50);
+                } else {
+                    // Hide it
+                    cofTooltip.classList.add('hidden');
+                }
+            }
+            
+            // Add event listeners
+            if (cofToggleButton) {
+                // Remove any existing event listeners (clone and replace)
+                const newButton = cofToggleButton.cloneNode(true);
+                cofToggleButton.parentNode.replaceChild(newButton, cofToggleButton);
+                newButton.addEventListener('click', toggleCoF);
+                console.log('Toggle button event listener added');
+            }
+            
+            if (cofCloseButton) {
+                // Set text content and add event listener
+                cofCloseButton.textContent = 'X';
+                
+                // Remove any existing event listeners (clone and replace)
+                const newCloseButton = cofCloseButton.cloneNode(true);
+                cofCloseButton.parentNode.replaceChild(newCloseButton, cofCloseButton);
+                newCloseButton.addEventListener('click', function() {
+                    cofTooltip.classList.add('hidden');
+                });
+                console.log('Close button event listener added');
+            }
+            
+            // Global keyboard shortcut
+            document.addEventListener('keydown', function(event) {
+                if ((event.key === 'c' || event.key === 'C') && 
+                    document.activeElement.tagName !== 'INPUT' && 
+                    document.activeElement.tagName !== 'TEXTAREA') {
+                    event.preventDefault();
+                    toggleCoF();
+                }
+            });
+            
+            // Click outside to close
+            document.addEventListener('click', function(event) {
+                if (!cofTooltip.classList.contains('hidden') &&
+                    !cofTooltip.contains(event.target) && 
+                    event.target !== cofToggleButton) {
+                    cofTooltip.classList.add('hidden');
+                }
+            });
+            
+            console.log('Circle of Fifths setup complete');
         });
 
         document.addEventListener('keydown', function(event) {
@@ -654,42 +710,36 @@
             }
         });
 
-        // Create a function that forces the Circle of Fifths position
-        function forceCircleOfFifthsPosition() {
-            const cofTooltip = document.getElementById('circle-of-fifths-tooltip');
-            if (cofTooltip) {
-                // Force position with inline styles (highest priority)
-                cofTooltip.style.position = 'fixed';
-                cofTooltip.style.bottom = '20px';
-                cofTooltip.style.right = '20px';
-                cofTooltip.style.top = 'auto';
-                cofTooltip.style.left = 'auto';
-                cofTooltip.style.transform = 'none';
-                
-                // Also force it to show
-                if (cofTooltip.style.display === 'none') {
-                    cofTooltip.style.display = 'flex';
+        // Enhanced function to properly redraw the Circle of Fifths
+        function forceCircleRedraw() {
+            const tooltip = document.getElementById('circle-of-fifths-tooltip');
+            const circleContainer = document.getElementById('circle-container');
+            
+            // First clear the container
+            if (circleContainer) {
+                circleContainer.innerHTML = '';
+            }
+            
+            // Then force redraw with multiple attempts
+            // Try immediately
+            if (typeof renderCircleOfFifths === 'function') {
+                try {
+                    renderCircleOfFifths();
+                    console.log('Circle of Fifths rendered successfully');
+                } catch (e) {
+                    console.error('Error rendering Circle of Fifths:', e);
+                    
+                    // Fallback content if rendering fails
+                    circleContainer.innerHTML = '<div style="padding: 20px; text-align: center;">' +
+                        '<p>Unable to display Circle of Fifths.</p>' +
+                        '<p>Please refresh the page and try again.</p></div>';
                 }
-                
-                // Check for the collapse state
-                const cofCollapsed = getCookie('cof-collapsed');
-                if (cofCollapsed === 'true') {
-                    cofTooltip.classList.add('collapsed');
-                } else {
-                    cofTooltip.classList.remove('collapsed');
-                }
+            } else {
+                console.error('renderCircleOfFifths function not found');
+                circleContainer.innerHTML = '<div style="padding: 20px; text-align: center;">' +
+                    '<p>Circle of Fifths rendering function not available.</p></div>';
             }
         }
-
-        // Call this function at multiple points to ensure it takes effect
-        document.addEventListener('DOMContentLoaded', forceCircleOfFifthsPosition);
-        window.addEventListener('load', forceCircleOfFifthsPosition);
-
-        // Also run it after a short delay to override any other scripts
-        setTimeout(forceCircleOfFifthsPosition, 500);
-
-        // Repeat every few seconds to ensure it stays in place
-        setInterval(forceCircleOfFifthsPosition, 2000);
 
         // Add this function to display note names on the fretboard after answering
         function showNotesOnFretboard() {
@@ -815,6 +865,221 @@
         // Run the check immediately
         checkOrientation();
         console.log('Orientation detection initialized');
+
+        // Fix Circle of Fifths rendering issues
+        function fixCircleOfFifthsRendering() {
+            // Define a proper rendering function that ensures correct sizing
+            window.renderCircleOfFifthsFixed = function() {
+                console.log('Running enhanced Circle of Fifths rendering');
+                
+                const container = document.getElementById('circle-container');
+                if (!container) {
+                    console.error('Circle container not found');
+                    return;
+                }
+                
+                // Clear existing content
+                container.innerHTML = '';
+                
+                // Set explicit dimensions for the container
+                container.style.width = '300px';
+                container.style.height = '300px';
+                container.style.position = 'relative';
+                
+                // Force layout recalculation
+                container.offsetHeight; // This triggers a reflow
+                
+                // Now render the circle of fifths
+                const size = 300; // Use fixed size instead of container dimensions
+                const radius = size / 2;
+                
+                circleKeys.forEach(key => {
+                    const angleRad = (key.angle * Math.PI) / 180;
+                    const x = radius + (radius * 0.7) * Math.cos(angleRad);
+                    const y = radius + (radius * 0.7) * Math.sin(angleRad);
+                    
+                    const keyDiv = document.createElement('div');
+                    keyDiv.className = 'circle-key';
+                    keyDiv.textContent = getCookie(`circle_${key.key}`) || key.key;
+                    if (key.alt) keyDiv.classList.add('sharp-flat');
+                    
+                    // Position the key element
+                    keyDiv.style.position = 'absolute';
+                    keyDiv.style.left = `${x}px`;
+                    keyDiv.style.top = `${y}px`;
+                    keyDiv.style.transform = 'translate(-50%, -50%)';
+                    keyDiv.style.width = '40px';
+                    keyDiv.style.height = '40px';
+                    keyDiv.style.borderRadius = '50%';
+                    keyDiv.style.display = 'flex';
+                    keyDiv.style.alignItems = 'center';
+                    keyDiv.style.justifyContent = 'center';
+                    keyDiv.style.background = 'var(--accent-color)';
+                    keyDiv.style.color = 'var(--tooltip-bg)';
+                    keyDiv.style.fontWeight = 'bold';
+                    keyDiv.style.cursor = 'pointer';
+                    keyDiv.style.zIndex = '2';
+                    
+                    keyDiv.addEventListener('click', () => {
+                        if (key.alt) {
+                            const current = keyDiv.textContent;
+                            const newKey = current === key.key ? key.alt : key.key;
+                            keyDiv.textContent = newKey;
+                            
+                            // Store preference in cookie
+                            const canonicalKey = key.key.includes('#') ? key.key : (key.alt || key.key);
+                            setCookie(`circle_${canonicalKey}`, newKey, 30);
+                            
+                            // Update any displayed notes if needed
+                            if (typeof updateDisplayedNotes === 'function') {
+                                updateDisplayedNotes();
+                            }
+                        }
+                    });
+                    
+                    container.appendChild(keyDiv);
+                });
+                
+                // Draw center circle
+                const centerCircle = document.createElement('div');
+                centerCircle.style.position = 'absolute';
+                centerCircle.style.left = '50%';
+                centerCircle.style.top = '50%';
+                centerCircle.style.transform = 'translate(-50%, -50%)';
+                centerCircle.style.width = '80px';
+                centerCircle.style.height = '80px';
+                centerCircle.style.borderRadius = '50%';
+                centerCircle.style.border = '2px solid var(--accent-color)';
+                centerCircle.style.zIndex = '1';
+                container.appendChild(centerCircle);
+                
+                // Draw outer circle
+                const outerCircle = document.createElement('div');
+                outerCircle.style.position = 'absolute';
+                outerCircle.style.left = '50%';
+                outerCircle.style.top = '50%';
+                outerCircle.style.transform = 'translate(-50%, -50%)';
+                outerCircle.style.width = '240px';
+                outerCircle.style.height = '240px';
+                outerCircle.style.borderRadius = '50%';
+                outerCircle.style.border = '2px solid var(--accent-color)';
+                outerCircle.style.zIndex = '1';
+                container.appendChild(outerCircle);
+                
+                console.log('Circle of Fifths rendering complete');
+            };
+            
+            // Override the original rendering function
+            window.originalRenderCircleOfFifths = window.renderCircleOfFifths;
+            window.renderCircleOfFifths = window.renderCircleOfFifthsFixed;
+            
+            // Update the toggle function to use our fixed renderer
+            const toggleCoF = function(event) {
+                if (event) {
+                    event.stopPropagation();
+                }
+                
+                const cofTooltip = document.getElementById('circle-of-fifths-tooltip');
+                const isHidden = cofTooltip.classList.contains('hidden');
+                
+                if (isHidden) {
+                    cofTooltip.classList.remove('hidden');
+                    
+                    // Use the fixed rendering function
+                    setTimeout(function() {
+                        if (typeof renderCircleOfFifthsFixed === 'function') {
+                            renderCircleOfFifthsFixed();
+                        }
+                    }, 50);
+                } else {
+                    cofTooltip.classList.add('hidden');
+                }
+            };
+            
+            // Update event listeners to use the new toggle function
+            const cofToggleButton = document.getElementById('cof-toggle-button');
+            if (cofToggleButton) {
+                const newButton = cofToggleButton.cloneNode(true);
+                cofToggleButton.parentNode.replaceChild(newButton, cofToggleButton);
+                newButton.addEventListener('click', toggleCoF);
+            }
+            
+            // Also update the keyboard shortcut
+            document.addEventListener('keydown', function(event) {
+                if ((event.key === 'c' || event.key === 'C') && 
+                    document.activeElement.tagName !== 'INPUT' && 
+                    document.activeElement.tagName !== 'TEXTAREA') {
+                    event.preventDefault();
+                    toggleCoF();
+                }
+            });
+            
+            console.log('Circle of Fifths rendering fixed');
+        }
+
+        // Run the fix immediately
+        fixCircleOfFifthsRendering();
+
+        // Fix the missing keyboard shortcut for Circle of Fifths
+        (function() {
+            console.log('Setting up Circle of Fifths keyboard shortcut...');
+            
+            // Remove any existing keyboard listeners (which is hard to do directly)
+            // Instead, we'll create a single, high-priority handler
+            
+            document.addEventListener('keydown', function(event) {
+                // For Circle of Fifths - "C" key
+                if ((event.key === 'c' || event.key === 'C') && 
+                    document.activeElement.tagName !== 'INPUT' && 
+                    document.activeElement.tagName !== 'TEXTAREA') {
+                    
+                    console.log('Circle of Fifths keyboard shortcut detected');
+                    event.preventDefault();
+                    
+                    // Get the tooltip element
+                    const cofTooltip = document.getElementById('circle-of-fifths-tooltip');
+                    if (!cofTooltip) {
+                        console.error('Circle of Fifths tooltip not found');
+                        return;
+                    }
+                    
+                    // Toggle visibility
+                    const isHidden = cofTooltip.classList.contains('hidden');
+                    console.log('Current visibility state:', isHidden ? 'hidden' : 'visible');
+                    
+                    if (isHidden) {
+                        cofTooltip.classList.remove('hidden');
+                        
+                        // Render the circle
+                        setTimeout(function() {
+                            if (typeof renderCircleOfFifthsFixed === 'function') {
+                                console.log('Rendering with fixed function');
+                                renderCircleOfFifthsFixed();
+                            } else if (typeof renderCircleOfFifths === 'function') {
+                                console.log('Rendering with original function');
+                                renderCircleOfFifths();
+                            } else {
+                                console.error('No rendering function available');
+                            }
+                        }, 50);
+                    } else {
+                        cofTooltip.classList.add('hidden');
+                    }
+                }
+                
+                // Keep spacebar functionality for playing notes
+                if ((event.key === ' ' || event.code === 'Space') && 
+                    document.activeElement.tagName !== 'INPUT' && 
+                    document.activeElement.tagName !== 'TEXTAREA') {
+                    event.preventDefault();
+                    if (typeof playChordOrNote === 'function') {
+                        playChordOrNote();
+                    }
+                }
+            }, true); // Use capturing phase to ensure this handler runs first
+            
+            console.log('Circle of Fifths keyboard shortcut setup complete');
+        })();
     </script>
 </body>
 </html>
