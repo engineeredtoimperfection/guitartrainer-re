@@ -224,48 +224,51 @@
         }
 
         function generateTriadAnswerOptions(correctChord) {
-            const options = new Set([correctChord]);
-            
-            // Extract root and type symbol from the chord name
-            let root, typeSymbol, inversion = '';
-            
-            if (correctChord.includes('(')) {
-                inversion = correctChord.slice(correctChord.indexOf(' ('));
-                const baseName = correctChord.slice(0, correctChord.indexOf(' ('));
-                
-                // Check if it has a chord symbol
-                if (baseName.match(/[m+o]$/)) {
-                    root = baseName.slice(0, -1);
-                    typeSymbol = baseName.slice(-1);
-                } else {
-                    root = baseName;
-                    typeSymbol = ''; // Major
-                }
-            } else {
-                // Check if it has a chord symbol
-                if (correctChord.match(/[m+o]$/)) {
-                    root = correctChord.slice(0, -1);
-                    typeSymbol = correctChord.slice(-1);
-                } else {
-                    root = correctChord;
-                    typeSymbol = ''; // Major
-                }
-            }
+            const options = [correctChord];
             
             // Get available triad types for generating options
             const availableTriadTypes = getAvailableTriadTypes();
-            const symbolMap = {'': 'major', 'm': 'minor', 'o': 'diminished', '+': 'augmented'};
-            const currentType = symbolMap[typeSymbol];
+            const cleanNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
             
-            while (options.size < 4) {
+            // Get available inversions
+            const inversions = [];
+            if (document.getElementById('rootPosition').checked) inversions.push(0);
+            if (document.getElementById('firstInversion').checked) inversions.push(1);
+            if (document.getElementById('secondInversion').checked) inversions.push(2);
             
-                const randomRoot = notes[Math.floor(Math.random() * notes.length)];
-                if (randomRoot !== root) {
-                    options.add(`${randomRoot}${typeSymbol}${inversion}`);      
+            // Create wrong options until we have 4 total options
+            while (options.length < 4) {
+                // Random note
+                const note = cleanNotes[Math.floor(Math.random() * cleanNotes.length)];
+                
+                // Random triad type
+                const type = availableTriadTypes[Math.floor(Math.random() * availableTriadTypes.length)];
+                
+                // Format a fake chord name
+                let wrongOption = `${note}${triads[type].symbol}`;
+                
+                // Only add slash notation if the correct answer has it
+                if (correctChord.includes('/')) {
+                    // Get a random inversion that matches our selected inversions
+                    const inversion = inversions[Math.floor(Math.random() * inversions.length)];
+                    
+                    // Calculate the bass note based on the inversion
+                    const intervals = triads[type].intervals;
+                    const rootIndex = cleanNotes.indexOf(note);
+                    const bassNoteIndex = (rootIndex + intervals[inversion]) % 12;
+                    const bassNote = cleanNotes[bassNoteIndex];
+                    
+                    wrongOption += `/${bassNote}`;
+                }
+                
+                // Add to options if not already included
+                if (!options.includes(wrongOption)) {
+                    options.push(wrongOption);
                 }
             }
             
-            return Array.from(options).sort(() => Math.random() - 0.5);
+            // Shuffle the options
+            return options.sort(() => Math.random() - 0.5);
         }
 
         function checkAnswer(selected, correct) {

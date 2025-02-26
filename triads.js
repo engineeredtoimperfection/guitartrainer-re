@@ -194,103 +194,115 @@ function getRandomTriad() {
     // Clean note names only
     const cleanNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     
-    // Select random root note, type and inversion
-    const rootNote = cleanNotes[Math.floor(Math.random() * cleanNotes.length)];
-    const triadType = triadTypes[Math.floor(Math.random() * triadTypes.length)];
-    const inversion = inversions[Math.floor(Math.random() * inversions.length)];
+    // Maximum attempts to find a valid triad to prevent infinite loops
+    const maxAttempts = 20;
+    let attempts = 0;
     
-    // Get the intervals for this triad type
-    const intervals = triads[triadType].intervals;
-    const rootIndex = getNoteIndex(rootNote);
-    
-    // Calculate the actual notes of this triad (chromatic indices)
-    const triadNotes = intervals.map(interval => (rootIndex + interval) % 12);
-    
-    // Find valid string sets from available strings
-    const validStringSets = [];
-    for (let i = 0; i <= selectedStrings.length - 3; i++) {
-        // Get consecutive strings
-        validStringSets.push(selectedStrings.slice(i, i + 3));
-    }
-    
-    if (validStringSets.length === 0) {
-        alert('Need at least 3 consecutive strings selected');
-        return;
-    }
-    
-    // Try to place the triad on the fretboard
-    let position = null;
-    
-    // Try each valid string set
-    for (const stringSet of validStringSets) {
-        // Sort strings by pitch (bass to treble)
-        const sortedStrings = [...stringSet].sort((a, b) => b - a);
+    while (attempts < maxAttempts) {
+        attempts++;
         
-        // Get the triad notes in the correct order based on inversion
-        let orderedNotes;
-        if (inversion === 0) {
-            // Root position: Root, 3rd, 5th
-            orderedNotes = [triadNotes[0], triadNotes[1], triadNotes[2]];
-        } else if (inversion === 1) {
-            // First inversion: 3rd, Root, 5th
-            orderedNotes = [triadNotes[1], triadNotes[0], triadNotes[2]];
-        } else {
-            // Second inversion: 5th, Root, 3rd
-            orderedNotes = [triadNotes[2], triadNotes[0], triadNotes[1]];
+        // Select random root note, type and inversion
+        const rootNote = cleanNotes[Math.floor(Math.random() * cleanNotes.length)];
+        const triadType = triadTypes[Math.floor(Math.random() * triadTypes.length)];
+        const inversion = inversions[Math.floor(Math.random() * inversions.length)];
+        
+        // Get the intervals for this triad type
+        const intervals = triads[triadType].intervals;
+        const rootIndex = getNoteIndex(rootNote);
+        
+        // Calculate the actual notes of this triad (chromatic indices)
+        const triadNotes = intervals.map(interval => (rootIndex + interval) % 12);
+        
+        // Find valid string sets from available strings
+        const validStringSets = [];
+        for (let i = 0; i <= selectedStrings.length - 3; i++) {
+            // Get consecutive strings
+            validStringSets.push(selectedStrings.slice(i, i + 3));
         }
         
-        // Try to place these notes on these strings
-        position = calculateValidTriadPosition(sortedStrings, orderedNotes, minFret, maxFret);
+        if (validStringSets.length === 0) {
+            alert('Need at least 3 consecutive strings selected');
+            return;
+        }
         
-        if (position) break;
-    }
-    
-    // If we couldn't find a position, try again with different constraints
-    if (!position) {
-        // Try with a slightly expanded fret range
-        const expandedMinFret = Math.max(0, minFret - 2);
-        const expandedMaxFret = Math.min(24, maxFret + 2);
+        // Try to place the triad on the fretboard
+        let position = null;
         
+        // Try each valid string set
         for (const stringSet of validStringSets) {
+            // Sort strings by pitch (bass to treble)
             const sortedStrings = [...stringSet].sort((a, b) => b - a);
             
+            // Get the triad notes in the correct order based on inversion
             let orderedNotes;
             if (inversion === 0) {
+                // Root position: Root, 3rd, 5th
                 orderedNotes = [triadNotes[0], triadNotes[1], triadNotes[2]];
             } else if (inversion === 1) {
-                orderedNotes = [triadNotes[1], triadNotes[0], triadNotes[2]];
+                // First inversion: 3rd, 5th, Root
+                orderedNotes = [triadNotes[1], triadNotes[2], triadNotes[0]];
             } else {
+                // Second inversion: 5th, Root, 3rd
                 orderedNotes = [triadNotes[2], triadNotes[0], triadNotes[1]];
             }
             
-            position = calculateValidTriadPosition(sortedStrings, orderedNotes, expandedMinFret, expandedMaxFret);
+            // Try to place these notes on these strings
+            position = calculateValidTriadPosition(sortedStrings, orderedNotes, minFret, maxFret);
             
             if (position) break;
         }
+        
+        // If we couldn't find a position, try with a slightly expanded fret range
+        if (!position) {
+            const expandedMinFret = Math.max(0, minFret - 2);
+            const expandedMaxFret = Math.min(24, maxFret + 2);
+            
+            for (const stringSet of validStringSets) {
+                const sortedStrings = [...stringSet].sort((a, b) => b - a);
+                
+                let orderedNotes;
+                if (inversion === 0) {
+                    orderedNotes = [triadNotes[0], triadNotes[1], triadNotes[2]];
+                } else if (inversion === 1) {
+                    orderedNotes = [triadNotes[1], triadNotes[2], triadNotes[0]];
+                } else {
+                    orderedNotes = [triadNotes[2], triadNotes[0], triadNotes[1]];
+                }
+                
+                position = calculateValidTriadPosition(sortedStrings, orderedNotes, expandedMinFret, expandedMaxFret);
+                
+                if (position) break;
+            }
+        }
+        
+        // If we found a valid position, use it
+        if (position) {
+            // Set current chord and update display
+            currentChord = position;
+            const actualChordName = determineActualChordName(position);
+            correctChordName = actualChordName;
+            
+            renderFretboard();
+            document.getElementById('feedback').textContent = '';
+            generateAnswerButtons();
+            return; // Successfully found a triad
+        }
     }
     
-    // If still no position found, retry with a different chord
-    if (!position) {
-        console.log("Couldn't find a valid position, trying a different chord...");
-        getRandomTriad();
-        return;
+    // If we've tried too many times and still can't find a valid triad
+    alert("Couldn't find a valid triad with current settings. Try expanding your fret range or selecting different strings.");
+    // Default to root position if we're having trouble
+    if (document.getElementById('firstInversion').checked || document.getElementById('secondInversion').checked) {
+        document.getElementById('rootPosition').checked = true;
     }
-    
-    // Set current chord and update display
-    currentChord = position;
-    const actualChordName = determineActualChordName(position);
-    correctChordName = actualChordName;
-    
-    renderFretboard();
-    document.getElementById('feedback').textContent = '';
-    generateAnswerButtons();
 }
 
 // Calculate a valid position for the specified notes on the specified strings
 function calculateValidTriadPosition(strings, notes, minFret, maxFret) {
     const positions = [];
+    const candidateFrets = [];
     
-    // For each string-note pair
+    // For each string-note pair, find possible frets
     for (let i = 0; i < 3; i++) {
         const string = strings[i];
         const note = notes[i];
@@ -302,16 +314,43 @@ function calculateValidTriadPosition(strings, notes, minFret, maxFret) {
         // Find the fret that produces this note
         let fret = (note - tuningIndex + 12) % 12;
         
-        // Adjust to be within range
-        while (fret < minFret) fret += 12;
+        // Collect all possible frets within the range
+        const possibleFrets = [];
+        while (fret <= maxFret) {
+            if (fret >= minFret) {
+                possibleFrets.push(fret);
+            }
+            fret += 12;
+        }
         
-        // If we can't fit this note in range, return null
-        if (fret > maxFret) return null;
+        // If no possible frets for this string-note pair, return null
+        if (possibleFrets.length === 0) return null;
         
-        positions.push([string, fret]);
+        candidateFrets.push({ string, possibleFrets });
     }
     
-    return positions;
+    // Try all combinations of frets to find one within a 5-fret span
+    for (const fret1 of candidateFrets[0].possibleFrets) {
+        for (const fret2 of candidateFrets[1].possibleFrets) {
+            for (const fret3 of candidateFrets[2].possibleFrets) {
+                const allFrets = [fret1, fret2, fret3];
+                const minFretInShape = Math.min(...allFrets);
+                const maxFretInShape = Math.max(...allFrets);
+                
+                // Check if the fret span is within 5 frets (inclusive)
+                if (maxFretInShape - minFretInShape <= 4) {
+                    return [
+                        [candidateFrets[0].string, fret1],
+                        [candidateFrets[1].string, fret2],
+                        [candidateFrets[2].string, fret3]
+                    ];
+                }
+            }
+        }
+    }
+    
+    // If no valid combination found within 5-fret span
+    return null;
 }
 
 // Determine the actual chord name based on the notes in the position
@@ -384,78 +423,5 @@ function hasAllNotes(notesArray, targetNotes) {
 function getNoteIndex(note) {
     const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     return notes.indexOf(note);
-}
-
-// Generate answer options for the current triad
-function generateTriadAnswerOptions(correctChordName) {
-    const options = [correctChordName];
-    
-    // Get available triad types
-    const triadTypes = getAvailableTriadTypes();
-    
-    // Clean note names to choose from
-    const cleanNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    
-    // Create wrong options until we have 4 total options
-    while (options.length < 4) {
-        // Random note
-        const note = cleanNotes[Math.floor(Math.random() * cleanNotes.length)];
-        
-        // Random triad type
-        const type = triadTypes[Math.floor(Math.random() * triadTypes.length)];
-        
-        // Format a fake chord name
-        let wrongOption = `${note}${triads[type].symbol}`;
-        
-        // Randomly add a slash chord extension
-        if (Math.random() > 0.5) {
-            const bassNote = cleanNotes[Math.floor(Math.random() * cleanNotes.length)];
-            wrongOption += `/${bassNote}`;
-        }
-        
-        // Add to options if not already included
-        if (!options.includes(wrongOption)) {
-            options.push(wrongOption);
-        }
-    }
-    
-    // Shuffle the options
-    return options.sort(() => Math.random() - 0.5);
-}
-
-// Add this to your triads.js file - it ensures buttons remain clickable
-function ensureClickableAnswerButtons() {
-    // Select all answer buttons
-    const answerButtons = document.querySelectorAll('.answer-button');
-    
-    // If no buttons were found, regenerate them
-    if (answerButtons.length === 0) {
-        console.error("No answer buttons found!");
-        return;
-    }
-    
-    // Check each button for event listeners
-    answerButtons.forEach(button => {
-        // Clone and replace to remove any stale event listeners
-        const newButton = button.cloneNode(true);
-        button.parentNode.replaceChild(newButton, button);
-        
-        // Add fresh event listener
-        newButton.addEventListener('click', function() {
-            const selectedAnswer = newButton.textContent;
-            
-            if (selectedAnswer === correctChordName) {
-                document.getElementById('feedback').textContent = 'Correct!';
-                newButton.classList.add('correct');
-                setTimeout(getRandomTriad, 1000);
-            } else {
-                document.getElementById('feedback').textContent = 'Incorrect. Try again.';
-                newButton.classList.add('incorrect');
-            }
-            
-            // Show notes on fretboard after answering
-            showNotesOnFretboard();
-        });
-    });
 }
 
