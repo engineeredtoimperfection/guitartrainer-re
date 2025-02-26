@@ -97,6 +97,19 @@
             </div>
         </div>
 
+        <div id="orientation-popup" class="orientation-popup hidden">
+            <div class="orientation-content">
+                <div class="rotate-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48">
+                        <path fill="currentColor" d="M16.5 2.5l3 3-3 3v-2h-10v4h2v-2h8v2l3-3-3-3v2h-8v-2h-2v4h10v-2h2v-2z"/>
+                        <path fill="currentColor" d="M10 13H2v9h16v-9h-8zm7 8H3v-7h14v7z"/>
+                    </svg>
+                </div>
+                <h3>Please Rotate Your Device</h3>
+                <p>This app works best in landscape mode for better visualization of the guitar fretboard.</p>
+            </div>
+        </div>
+
         <div class="fretboard-container">
             <div id="fretboard" class="fretboard"></div>
             <div class="controls-row">
@@ -750,6 +763,58 @@
                 getRandomTriad();
             }
         });
+
+        // Check if device is mobile 
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                   (window.innerWidth <= 800);
+        }
+
+        // Check if orientation is portrait
+        function isPortrait() {
+            return window.innerHeight > window.innerWidth;
+        }
+
+        // Show or hide orientation popup based on device type and orientation
+        function checkOrientation() {
+            const orientationPopup = document.getElementById('orientation-popup');
+            
+            if (isMobileDevice() && isPortrait()) {
+                // Show popup and prevent scrolling
+                orientationPopup.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                console.log('Showing orientation popup - portrait detected');
+            } else {
+                // Hide popup and allow scrolling
+                orientationPopup.classList.add('hidden');
+                document.body.style.overflow = '';
+                console.log('Hiding orientation popup - landscape detected');
+                
+                // Force a redraw of the fretboard after orientation change
+                setTimeout(() => {
+                    if (typeof renderFretboard === 'function') {
+                        renderFretboard();
+                    }
+                    if (typeof renderCircleOfFifths === 'function') {
+                        renderCircleOfFifths();
+                    }
+                }, 300);
+            }
+        }
+
+        // Check orientation on page load and whenever orientation might change
+        document.addEventListener('DOMContentLoaded', checkOrientation);
+        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('orientationchange', checkOrientation);
+
+        // For iOS devices, which might not properly trigger orientation events
+        window.addEventListener('orientationchange', () => {
+            setTimeout(checkOrientation, 200); // Small delay to ensure dimensions have updated
+        });
+
+        // Run the check immediately
+        checkOrientation();
+        console.log('Orientation detection initialized');
     </script>
 </body>
 </html>
