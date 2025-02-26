@@ -46,50 +46,103 @@ function renderFretboard() {
     }
 
     // Now add the fret dots after strings are created
-    addFretDots(dotsContainer, maxFret);
+    // Wait for the layout to be rendered before positioning dots
+    setTimeout(() => addFretDots(dotsContainer, maxFret), 0);
 }
 
 function addFretDots(container, maxFret) {
-    // Standard fret dot positions
+    // Standard fret dots with different approach to vertical positioning
     const dotPositions = [
-        { fret: 3, position: 50 },  // 50% between 3rd & 4th string
-        { fret: 5, position: 50 },  // 50% between 3rd & 4th string
-        { fret: 7, position: 50 },  // 50% between 3rd & 4th string
-        { fret: 9, position: 50 },  // 50% between 3rd & 4th string
-        { fret: 12, position: 37 }, // Adjusted to be closer to middle (was 25%)
-        { fret: 12, position: 63 }, // Adjusted to be closer to middle (was 75%)
-        // Adding dots for higher frets
-        { fret: 15, position: 50 }, // 15th fret
-        { fret: 17, position: 50 }, // 17th fret
-        { fret: 19, position: 50 }, // 19th fret
-        { fret: 21, position: 50 }, // 21st fret
-        { fret: 24, position: 37 }, // 24th fret (double dots like 12th fret)
-        { fret: 24, position: 63 }  // 24th fret (double dots like 12th fret)
+        { fret: 3, verticalPosition: 'middle' },  // middle of fretboard
+        { fret: 5, verticalPosition: 'middle' },  
+        { fret: 7, verticalPosition: 'middle' },  
+        { fret: 9, verticalPosition: 'middle' },  
+        { fret: 12, verticalPosition: 'upper' },  // upper dot (12th fret)
+        { fret: 12, verticalPosition: 'lower' },  // lower dot (12th fret)
+        { fret: 15, verticalPosition: 'middle' }, 
+        { fret: 17, verticalPosition: 'middle' }, 
+        { fret: 19, verticalPosition: 'middle' }, 
+        { fret: 21, verticalPosition: 'middle' }, 
+        { fret: 24, verticalPosition: 'upper' }, 
+        { fret: 24, verticalPosition: 'lower' }  
     ];
     
-    dotPositions.forEach(({ fret, position }) => {
+    // Clear existing dots
+    container.innerHTML = '';
+    
+    dotPositions.forEach(({ fret, verticalPosition }) => {
         if (fret > maxFret) return;
         
-        // Get the fret element to reference for horizontal positioning
+        // Create a dot with data attributes for position type
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        dot.dataset.fret = fret;
+        dot.dataset.position = verticalPosition;
+        
+        // Add to container
+        container.appendChild(dot);
+    });
+    
+    // Now position the dots after they're in the DOM
+    positionDots();
+}
+
+// Improved positioning function
+function positionDots() {
+    const fretboard = document.getElementById('fretboard');
+    const dots = document.querySelectorAll('.dot');
+    
+    // First, find the first and last string for vertical reference points
+    const firstString = document.querySelector('.string[data-string="0"]');
+    const lastString = document.querySelector('.string[data-string="5"]');
+    
+    if (!firstString || !lastString) return;
+    
+    // Calculate the vertical range of the strings
+    const firstStringRect = firstString.getBoundingClientRect();
+    const lastStringRect = lastString.getBoundingClientRect();
+    
+    // Calculate top, middle and bottom positions
+    const topPosition = firstStringRect.top + (firstStringRect.height / 2);
+    const bottomPosition = lastStringRect.top + (lastStringRect.height / 2);
+    const middlePosition = topPosition + ((bottomPosition - topPosition) / 2);
+    
+    // Define vertical positions relative to the fretboard, not the window
+    const fretboardRect = fretboard.getBoundingClientRect();
+    const relativeTop = topPosition - fretboardRect.top + 4; // Add slight offset for better visual position
+    const relativeMiddle = middlePosition - fretboardRect.top;
+    const relativeBottom = bottomPosition - fretboardRect.top - 4; // Subtract slight offset
+    
+    // Use these relative positions to place dots
+    dots.forEach(dot => {
+        const fret = parseInt(dot.dataset.fret);
+        const positionType = dot.dataset.position;
+        
+        // Find reference fret element
         const refFretElement = document.querySelector(`.string[data-string="0"] .fret[data-fret="${fret}"]`);
         if (!refFretElement) return;
         
-        const dot = document.createElement('div');
-        dot.className = 'dot';
-        
-        // Get position relative to the fretboard
-        const fretboardRect = document.getElementById('fretboard').getBoundingClientRect();
+        // Calculate center position of the fret
         const refFretRect = refFretElement.getBoundingClientRect();
-        
-        // Calculate horizontal center of the fret
         const left = (refFretRect.left - fretboardRect.left) + (refFretRect.width / 2);
         
-        // Calculate vertical position based on percentage of fretboard height
-        // No more manual offset since transform: translate(-50%, -50%) handles centering
-        const top = fretboardRect.height * position / 100;
+        // Set vertical position based on position type
+        let top;
+        if (positionType === 'upper') {
+            top = relativeTop + ((relativeMiddle - relativeTop) / 2); // Between top and middle
+        } else if (positionType === 'lower') {
+            top = relativeMiddle + ((relativeBottom - relativeMiddle) / 2); // Between middle and bottom
+        } else {
+            top = relativeMiddle; // Default middle
+        }
         
+        // Set the position (using transform for exact centering)
         dot.style.left = `${left}px`;
         dot.style.top = `${top}px`;
-        container.appendChild(dot);
     });
 }
+
+// Add a resize handler to reposition dots when window size changes
+window.addEventListener('resize', debounce(() => {
+    positionDots();
+}, 100));

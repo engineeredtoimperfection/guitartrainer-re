@@ -18,8 +18,8 @@
             <h3>Settings <button id="toggle-settings" class="toggle-button"></button></h3>
             <div id="settings-content" class="settings-content">
                 Fret Range: 
-                <input type="number" id="minFret" min="0" max="12" value="0"> to 
-                <input type="number" id="maxFret" min="0" max="12" value="12"><br><br>
+                <input type="number" id="minFret" min="0" max="16" value="0"> to 
+                <input type="number" id="maxFret" min="0" max="16" value="16"><br><br>
                 
                 Strings: 
                 <label><input type="checkbox" class="string" value="0" checked>E (high)</label>
@@ -207,9 +207,12 @@
             options.forEach(option => {
                 const button = document.createElement('button');
                 button.textContent = option;
+                button.disabled = false;
                 button.addEventListener('click', () => checkAnswer(option, correctAnswer));
                 buttonsDiv.appendChild(button);
             });
+            
+            waitingForConfirmation = false;
         }
 
         function generateNoteAnswerOptions(correctNote) {
@@ -462,6 +465,15 @@
                 
                 // Save the state
                 setCookie('settings-collapsed', options.classList.contains('collapsed'), 30);
+            });
+            
+            // Auto-collapse settings when clicking on the fretboard
+            document.getElementById('fretboard').addEventListener('click', function() {
+                const options = document.querySelector('.options');
+                if (!options.classList.contains('collapsed')) {
+                    options.classList.add('collapsed');
+                    setCookie('settings-collapsed', true, 30);
+                }
             });
             
             // Load settings collapse state
