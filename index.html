@@ -11,7 +11,7 @@
         <h1>Guitar Fretboard Trainer</h1>
         
         <div id="instructions-tooltip" class="instructions-tooltip hidden">
-            <h3>How to Use <button id="instructions-close" class="instructions-close">X</button></h3>
+            <h3>How to Use</h3>
             <div class="instructions-content">
                 <p><strong>Goal:</strong> Learn the notes on the guitar fretboard.</p>
                 
@@ -69,9 +69,12 @@
             <button id="reset-score">Reset Score</button>
         </div>
 
-        <div id="circle-of-fifths-tooltip" class="hidden">
-            <h3 id="cof-header">Circle of Fifths <button id="toggle-cof">X</button></h3>
-            <div class="circle-container" id="circle-container"></div>
+        <div id="circle-of-fifths-tooltip" class="circle-of-fifths-tooltip hidden">
+            <h3>Circle of Fifths</h3>
+            <div id="circle-container"></div>
+            <div class="circle-instructions">
+                <p>Click on sharps/flats to toggle notation style</p>
+            </div>
         </div>
 
         <div class="theme-toggle-container">
@@ -96,9 +99,8 @@
     </div>
 
     <div id="settings-popup" class="settings-popup hidden">
-        <div id="settings-header">
+        <div id="settings-header" class="popup-header">
             <h3>Settings</h3>
-            <button id="settings-close" class="close-button">X</button>
         </div>
         <div id="settings-container">
             <div class="options" style="display: block;">
@@ -647,7 +649,6 @@
             // Get elements
             const cofTooltip = document.getElementById('circle-of-fifths-tooltip');
             const cofToggleButton = document.getElementById('cof-toggle-button');
-            const cofCloseButton = document.getElementById('toggle-cof');
             
             // Important: Remove any inline styles that might be conflicting
             if (cofTooltip) {
@@ -688,19 +689,6 @@
                 cofToggleButton.parentNode.replaceChild(newButton, cofToggleButton);
                 newButton.addEventListener('click', toggleCoF);
                 console.log('Toggle button event listener added');
-            }
-            
-            if (cofCloseButton) {
-                // Set text content and add event listener
-                cofCloseButton.textContent = 'X';
-                
-                // Remove any existing event listeners (clone and replace)
-                const newCloseButton = cofCloseButton.cloneNode(true);
-                cofCloseButton.parentNode.replaceChild(newCloseButton, cofCloseButton);
-                newCloseButton.addEventListener('click', function() {
-                    cofTooltip.classList.add('hidden');
-                });
-                console.log('Close button event listener added');
             }
             
             // Global keyboard shortcut
@@ -1113,7 +1101,6 @@
             // Get references to elements
             const settingsToggleButton = document.getElementById('settings-toggle-button');
             const settingsPopup = document.getElementById('settings-popup');
-            const settingsCloseButton = document.getElementById('settings-close');
             
             // Function to toggle settings popup visibility
             function toggleSettings(event) {
@@ -1146,12 +1133,14 @@
                 console.log('Settings toggle button event listener added');
             }
             
-            if (settingsCloseButton) {
-                settingsCloseButton.addEventListener('click', function() {
+            // Click outside to close
+            document.addEventListener('click', function(event) {
+                if (!settingsPopup.classList.contains('hidden') &&
+                    !settingsPopup.contains(event.target) && 
+                    event.target !== settingsToggleButton) {
                     settingsPopup.classList.add('hidden');
-                });
-                console.log('Settings close button event listener added');
-            }
+                }
+            });
             
             // Add keyboard shortcut - 'S' for settings
             document.addEventListener('keydown', function(event) {
@@ -1160,15 +1149,6 @@
                     document.activeElement.tagName !== 'TEXTAREA') {
                     event.preventDefault();
                     toggleSettings();
-                }
-            });
-            
-            // Click outside to close
-            document.addEventListener('click', function(event) {
-                if (!settingsPopup.classList.contains('hidden') &&
-                    !settingsPopup.contains(event.target) && 
-                    event.target !== settingsToggleButton) {
-                    settingsPopup.classList.add('hidden');
                 }
             });
             
