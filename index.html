@@ -54,10 +54,10 @@
         <div class="fretboard-container">
             <div id="fretboard" class="fretboard"></div>
             <div class="controls-row">
-                <button id="soundButton" title="Play Sound (Spacebar)">🔊</button>
                 <div id="answer-buttons" class="buttons">
                     <!-- Buttons will be created dynamically -->
                 </div>
+                <button id="soundButton" title="Play Sound (Spacebar)">🔊</button>
             </div>
             <div id="feedback"></div>
         </div>
@@ -86,69 +86,62 @@
             </button>
         </div>
 
-        <a href="https://github.com/gWOLF3/guitartrainer" target="_blank" class="github-link">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
-</svg>
-            <span>Open Source on GitHub</span>
-        </a>
-    </div>
-
-    <div class="header-control settings-button-container">
-        <button id="settings-toggle-button" class="icon-button" title="Settings (S)">⚙️</button>
-    </div>
-
-    <div id="settings-popup" class="settings-popup hidden">
-        <div id="settings-header" class="popup-header">
-            <h3>Settings</h3>
+        <div class="header-control settings-button-container">
+            <button id="settings-toggle-button" class="icon-button" title="Settings (S)">⚙️</button>
         </div>
-        <div id="settings-container">
-            <div class="options" style="display: block;">
-                <div id="settings-content" class="settings-content" style="display: block; max-height: none;">
-                    Fret Range: 
-                    <input type="number" id="minFret" min="0" max="16" value="0"> to 
-                    <input type="number" id="maxFret" min="0" max="16" value="16"><br><br>
-                    
-                    Strings: 
-                    <label><input type="checkbox" class="string" value="0" checked>E (high)</label>
-                    <label><input type="checkbox" class="string" value="1" checked>B</label>
-                    <label><input type="checkbox" class="string" value="2" checked>G</label>
-                    <label><input type="checkbox" class="string" value="3" checked>D</label>
-                    <label><input type="checkbox" class="string" value="4" checked>A</label>
-                    <label><input type="checkbox" class="string" value="5" checked>E (low)</label><br><br>
-                    
-                    <div class="mode-selection">
-                        <div class="mode-header">Mode:</div>
+
+        <div id="settings-popup" class="settings-popup hidden">
+            <div id="settings-header" class="popup-header">
+                <h3>Settings</h3>
+            </div>
+            <div id="settings-container">
+                <div class="options" style="display: block;">
+                    <div id="settings-content" class="settings-content" style="display: block; max-height: none;">
+                        Fret Range: 
+                        <input type="number" id="minFret" min="0" max="16" value="0"> to 
+                        <input type="number" id="maxFret" min="0" max="16" value="16"><br><br>
                         
-                        <div class="mode-option">
-                            <label><input type="radio" name="mode" id="noteMode" value="note" checked> Note</label>
-                            <div id="noteTypes" class="submenu" style="display: block;">
-                                <div class="submenu-content">
-                                    <div class="submenu-section">
-                                        <span class="submenu-label">Note Types:</span>
-                                        <label><input type="checkbox" id="naturals" checked>Naturals</label>
-                                        <label><input type="checkbox" id="sharpsFlats" checked>Sharps/Flats</label>
+                        Strings: 
+                        <label><input type="checkbox" class="string" value="0" checked>E (high)</label>
+                        <label><input type="checkbox" class="string" value="1" checked>B</label>
+                        <label><input type="checkbox" class="string" value="2" checked>G</label>
+                        <label><input type="checkbox" class="string" value="3" checked>D</label>
+                        <label><input type="checkbox" class="string" value="4" checked>A</label>
+                        <label><input type="checkbox" class="string" value="5" checked>E (low)</label><br><br>
+                        
+                        <div class="mode-selection">
+                            <div class="mode-header">Mode:</div>
+                            
+                            <div class="mode-option">
+                                <label><input type="radio" name="mode" id="noteMode" value="note" checked> Note</label>
+                                <div id="noteTypes" class="submenu" style="display: block;">
+                                    <div class="submenu-content">
+                                        <div class="submenu-section">
+                                            <span class="submenu-label">Note Types:</span>
+                                            <label><input type="checkbox" id="naturals" checked>Naturals</label>
+                                            <label><input type="checkbox" id="sharpsFlats" checked>Sharps/Flats</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="mode-option">
-                            <label><input type="radio" name="mode" id="triadMode" value="triad"> Triad</label>
-                            <div id="triadInversions" class="submenu" style="display: block;">
-                                <div class="submenu-content">
-                                    <div class="submenu-section">
-                                        <span class="submenu-label">Inversions:</span>
-                                        <label><input type="checkbox" id="rootPosition" checked> Root Position</label>
-                                        <label><input type="checkbox" id="firstInversion" checked> First Inversion</label>
-                                        <label><input type="checkbox" id="secondInversion" checked> Second Inversion</label>
-                                    </div>
-                                    <div class="submenu-section">
-                                        <span class="submenu-label">Triad Types:</span>
-                                        <label><input type="checkbox" id="majorTriads" checked> Major</label>
-                                        <label><input type="checkbox" id="minorTriads" checked> Minor</label>
-                                        <label><input type="checkbox" id="diminishedTriads"> Diminished</label>
-                                        <label><input type="checkbox" id="augmentedTriads"> Augmented</label>
+                            
+                            <div class="mode-option">
+                                <label><input type="radio" name="mode" id="triadMode" value="triad"> Triad</label>
+                                <div id="triadInversions" class="submenu" style="display: block;">
+                                    <div class="submenu-content">
+                                        <div class="submenu-section">
+                                            <span class="submenu-label">Inversions:</span>
+                                            <label><input type="checkbox" id="rootPosition" checked> Root Position</label>
+                                            <label><input type="checkbox" id="firstInversion" checked> First Inversion</label>
+                                            <label><input type="checkbox" id="secondInversion" checked> Second Inversion</label>
+                                        </div>
+                                        <div class="submenu-section">
+                                            <span class="submenu-label">Triad Types:</span>
+                                            <label><input type="checkbox" id="majorTriads" checked> Major</label>
+                                            <label><input type="checkbox" id="minorTriads" checked> Minor</label>
+                                            <label><input type="checkbox" id="diminishedTriads"> Diminished</label>
+                                            <label><input type="checkbox" id="augmentedTriads"> Augmented</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -157,6 +150,14 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="header-controls">
+        <a href="https://github.com/gWOLF3/guitartrainer" target="_blank" class="github-link header-github-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+        </a>
     </div>
 
     <script src="fretboard.js"></script>
@@ -1245,6 +1246,20 @@
                 }
             });
             topBar.appendChild(helpButton);
+            
+            // Create GitHub button
+            const githubButton = document.createElement('button');
+            githubButton.className = 'top-bar-button';
+            githubButton.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+            `;
+            githubButton.title = "View Source on GitHub";
+            githubButton.addEventListener('click', function() {
+                window.open('https://github.com/gWOLF3/guitartrainer', '_blank');
+            });
+            topBar.appendChild(githubButton);
             
             console.log('Clean top bar created with all buttons');
         });

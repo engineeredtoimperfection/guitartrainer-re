@@ -1289,47 +1289,40 @@ html, body {
     border-width: 2px;
 }
 
-/* GitHub open source button styling */
+/* Modified GitHub link styling for the header placement */
 .github-link {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    padding: 8px 12px;
-    background: rgba(0, 0, 0, 0.7);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 6px;
-    font-size: 14px;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    z-index: 900;
+    padding: 4px 8px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #00cc99;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
 .github-link:hover {
-    background: rgba(0, 0, 0, 0.9);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-color: var(--accent-color);
+    background: rgba(0, 0, 0, 0.8);
+    color: #00ffbf;
+    border-color: #00cc99;
 }
 
-.github-icon {
-    font-size: 18px;
+.github-link svg {
+    width: 18px;
+    height: 18px;
 }
 
-/* Light mode version */
-[data-theme="light"] .github-link {
-    background: rgba(255, 255, 255, 0.9);
-    color: #333333;
-    border-color: rgba(0, 0, 0, 0.2);
+/* Specific adjustments for placement in the header */
+.header-github-link {
+    margin-left: auto; /* Push to the right side if in a flex container */
 }
 
-[data-theme="light"] .github-link:hover {
-    background: #ffffff;
-    border-color: var(--accent-color);
+/* If your header is not a flex container already, add this to its class */
+.header-controls {
+    display: flex;
+    align-items: center;
 }
 
 /* Orientation popup */
