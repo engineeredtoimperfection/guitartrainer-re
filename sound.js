@@ -1,8 +1,15 @@
 const openStringFreqs = [329.63, 246.94, 196.00, 146.83, 110.00, 82.41];
 
+// Use the existing sharedAudioContext from index.html
 function playNote(string, fret) {
     try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        // Get the shared audio context instead of creating a new one
+        const audioContext = sharedAudioContext || initAudioContext();
+        if (!audioContext) {
+            console.error('AudioContext not available');
+            return;
+        }
+        
         const oscillator = audioContext.createOscillator();
         const filter = audioContext.createBiquadFilter();
         const gainNode = audioContext.createGain();
@@ -40,7 +47,12 @@ function playNote(string, fret) {
 
 function playChord(positions) {
     try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        // Get the shared audio context instead of creating a new one
+        const audioContext = sharedAudioContext || initAudioContext();
+        if (!audioContext) {
+            console.error('AudioContext not available');
+            return;
+        }
         
         // Create a chord envelope shared by all notes
         const masterGain = audioContext.createGain();
@@ -91,7 +103,13 @@ function playFeedbackSound(isCorrect) {
 
 function playTone(frequency, duration) {
     try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        // Get the shared audio context instead of creating a new one
+        const audioContext = sharedAudioContext || initAudioContext();
+        if (!audioContext) {
+            console.error('AudioContext not available');
+            return;
+        }
+        
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
         

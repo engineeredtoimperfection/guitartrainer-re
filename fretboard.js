@@ -142,7 +142,16 @@ function positionDots() {
     });
 }
 
-// Add a resize handler to reposition dots when window size changes
+// Add this function definition before it's used
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
+// Then the existing code will work:
 window.addEventListener('resize', debounce(() => {
     positionDots();
 }, 100));

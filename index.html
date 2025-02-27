@@ -10,61 +10,6 @@
     <div class="container">
         <h1>Guitar Fretboard Trainer</h1>
         
-        
-        <div class="options">
-            <div id="settings-content" class="settings-content">
-                Fret Range: 
-                <input type="number" id="minFret" min="0" max="16" value="0"> to 
-                <input type="number" id="maxFret" min="0" max="16" value="16"><br><br>
-                
-                Strings: 
-                <label><input type="checkbox" class="string" value="0" checked>E (high)</label>
-                <label><input type="checkbox" class="string" value="1" checked>B</label>
-                <label><input type="checkbox" class="string" value="2" checked>G</label>
-                <label><input type="checkbox" class="string" value="3" checked>D</label>
-                <label><input type="checkbox" class="string" value="4" checked>A</label>
-                <label><input type="checkbox" class="string" value="5" checked>E (low)</label><br><br>
-                
-                <div class="mode-selection">
-                    <div class="mode-header">Mode:</div>
-                    
-                    <div class="mode-option">
-                        <label><input type="radio" name="mode" id="noteMode" value="note" checked> Note</label>
-                        <div id="noteTypes" class="submenu">
-                            <div class="submenu-content">
-                                <div class="submenu-section">
-                                    <span class="submenu-label">Note Types:</span>
-                                    <label><input type="checkbox" id="naturals" checked>Naturals</label>
-                                    <label><input type="checkbox" id="sharpsFlats" checked>Sharps/Flats</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="mode-option">
-                        <label><input type="radio" name="mode" id="triadMode" value="triad"> Triad</label>
-                        <div id="triadInversions" class="submenu">
-                            <div class="submenu-content">
-                                <div class="submenu-section">
-                                    <span class="submenu-label">Inversions:</span>
-                                    <label><input type="checkbox" id="rootPosition" checked> Root Position</label>
-                                    <label><input type="checkbox" id="firstInversion" checked> First Inversion</label>
-                                    <label><input type="checkbox" id="secondInversion" checked> Second Inversion</label>
-                                </div>
-                                <div class="submenu-section">
-                                    <span class="submenu-label">Triad Types:</span>
-                                    <label><input type="checkbox" id="majorTriads" checked> Major</label>
-                                    <label><input type="checkbox" id="minorTriads" checked> Minor</label>
-                                    <label><input type="checkbox" id="diminishedTriads"> Diminished</label>
-                                    <label><input type="checkbox" id="augmentedTriads"> Augmented</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div id="instructions-tooltip" class="instructions-tooltip hidden">
             <h3>How to Use <button id="instructions-close" class="instructions-close">X</button></h3>
             <div class="instructions-content">
@@ -156,7 +101,59 @@
             <button id="settings-close" class="close-button">X</button>
         </div>
         <div id="settings-container">
-            <!-- Settings content will be moved here by JavaScript -->
+            <div class="options" style="display: block;">
+                <div id="settings-content" class="settings-content" style="display: block; max-height: none;">
+                    Fret Range: 
+                    <input type="number" id="minFret" min="0" max="16" value="0"> to 
+                    <input type="number" id="maxFret" min="0" max="16" value="16"><br><br>
+                    
+                    Strings: 
+                    <label><input type="checkbox" class="string" value="0" checked>E (high)</label>
+                    <label><input type="checkbox" class="string" value="1" checked>B</label>
+                    <label><input type="checkbox" class="string" value="2" checked>G</label>
+                    <label><input type="checkbox" class="string" value="3" checked>D</label>
+                    <label><input type="checkbox" class="string" value="4" checked>A</label>
+                    <label><input type="checkbox" class="string" value="5" checked>E (low)</label><br><br>
+                    
+                    <div class="mode-selection">
+                        <div class="mode-header">Mode:</div>
+                        
+                        <div class="mode-option">
+                            <label><input type="radio" name="mode" id="noteMode" value="note" checked> Note</label>
+                            <div id="noteTypes" class="submenu" style="display: block;">
+                                <div class="submenu-content">
+                                    <div class="submenu-section">
+                                        <span class="submenu-label">Note Types:</span>
+                                        <label><input type="checkbox" id="naturals" checked>Naturals</label>
+                                        <label><input type="checkbox" id="sharpsFlats" checked>Sharps/Flats</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mode-option">
+                            <label><input type="radio" name="mode" id="triadMode" value="triad"> Triad</label>
+                            <div id="triadInversions" class="submenu" style="display: block;">
+                                <div class="submenu-content">
+                                    <div class="submenu-section">
+                                        <span class="submenu-label">Inversions:</span>
+                                        <label><input type="checkbox" id="rootPosition" checked> Root Position</label>
+                                        <label><input type="checkbox" id="firstInversion" checked> First Inversion</label>
+                                        <label><input type="checkbox" id="secondInversion" checked> Second Inversion</label>
+                                    </div>
+                                    <div class="submenu-section">
+                                        <span class="submenu-label">Triad Types:</span>
+                                        <label><input type="checkbox" id="majorTriads" checked> Major</label>
+                                        <label><input type="checkbox" id="minorTriads" checked> Minor</label>
+                                        <label><input type="checkbox" id="diminishedTriads"> Diminished</label>
+                                        <label><input type="checkbox" id="augmentedTriads"> Augmented</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -170,6 +167,24 @@
         const stringTunings = ['E', 'B', 'G', 'D', 'A', 'E'];
         let currentString, currentFret, correctNote, currentChord, correctChordName;
         let waitingForConfirmation = false;
+
+        // Create a global shared AudioContext
+        let sharedAudioContext;
+
+        // Initialize AudioContext on first user interaction
+        function initAudioContext() {
+            if (!sharedAudioContext) {
+                try {
+                    sharedAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    console.log('AudioContext initialized successfully');
+                } catch (error) {
+                    console.error('Failed to initialize AudioContext:', error);
+                }
+            } else if (sharedAudioContext.state === 'suspended') {
+                sharedAudioContext.resume();
+            }
+            return sharedAudioContext;
+        }
 
         function setCookie(name, value, days) {
             const d = new Date();
@@ -1093,151 +1108,74 @@
 
         // Updated Settings Popup functionality
         (function() {
-            console.log('Setting up Settings popup...');
+            console.log('Setting up simplified Settings popup...');
             
-            // Run this function when the document is ready
-            function setupSettings() {
-                // Try different selectors for existing settings elements
-                const existingSettings = document.querySelector('.settings-panel') || 
-                                        document.querySelector('.options') || 
-                                        document.querySelector('.settings');
-                
-                const settingsToggleButton = document.getElementById('settings-toggle-button');
-                const settingsPopup = document.getElementById('settings-popup');
-                const settingsCloseButton = document.getElementById('settings-close');
-                const settingsContainer = document.getElementById('settings-container');
-                
-                if (!existingSettings) {
-                    console.error('Settings panel not found with any selector');
-                    return;
+            // Get references to elements
+            const settingsToggleButton = document.getElementById('settings-toggle-button');
+            const settingsPopup = document.getElementById('settings-popup');
+            const settingsCloseButton = document.getElementById('settings-close');
+            
+            // Function to toggle settings popup visibility
+            function toggleSettings(event) {
+                if (event) {
+                    event.stopPropagation();
                 }
                 
-                if (!settingsPopup || !settingsContainer) {
-                    console.error('Settings popup elements not found');
-                    return;
-                }
+                const isHidden = settingsPopup.classList.contains('hidden');
+                console.log('Toggling Settings, currently hidden:', isHidden);
                 
-                // Clone the settings content to move to the popup
-                const settingsContent = existingSettings.cloneNode(true);
-                
-                // Remove the toggle button from the cloned content
-                const toggleButton = settingsContent.querySelector('#toggle-settings');
-                if (toggleButton) {
-                    toggleButton.remove();
-                }
-                
-                // Find the settings-content div and make sure it's visible
-                const innerSettingsContent = settingsContent.querySelector('.settings-content');
-                if (innerSettingsContent) {
-                    innerSettingsContent.style.display = 'block';
-                    innerSettingsContent.style.maxHeight = 'none'; // Ensure no height restrictions
-                }
-                
-                // Clear the container and add the settings
-                settingsContainer.innerHTML = '';
-                settingsContainer.appendChild(settingsContent);
-                
-                // Ensure settings are visible within the popup
-                settingsContent.style.display = 'block';
-                
-                // Hide the original settings panel
-                existingSettings.style.display = 'none';
-                
-                // Function to toggle settings popup visibility
-                function toggleSettings(event) {
-                    if (event) {
-                        event.stopPropagation();
-                    }
+                if (isHidden) {
+                    // Show settings
+                    settingsPopup.classList.remove('hidden');
                     
-                    const isHidden = settingsPopup.classList.contains('hidden');
-                    console.log('Toggling Settings, currently hidden:', isHidden);
+                    // Hide other popups
+                    const cofTooltip = document.getElementById('circle-of-fifths-tooltip');
+                    const instructionsTooltip = document.getElementById('instructions-tooltip');
                     
-                    if (isHidden) {
-                        // Show settings
-                        settingsPopup.classList.remove('hidden');
-                        
-                        // Hide other popups
-                        const cofTooltip = document.getElementById('circle-of-fifths-tooltip');
-                        const instructionsTooltip = document.getElementById('instructions-tooltip');
-                        
-                        if (cofTooltip) cofTooltip.classList.add('hidden');
-                        if (instructionsTooltip) instructionsTooltip.classList.add('hidden');
-                    } else {
-                        // Hide settings
-                        settingsPopup.classList.add('hidden');
-                    }
+                    if (cofTooltip) cofTooltip.classList.add('hidden');
+                    if (instructionsTooltip) instructionsTooltip.classList.add('hidden');
+                } else {
+                    // Hide settings
+                    settingsPopup.classList.add('hidden');
                 }
-                
-                // Setup event listeners
-                if (settingsToggleButton) {
-                    settingsToggleButton.addEventListener('click', toggleSettings);
-                    console.log('Settings toggle button event listener added');
-                }
-                
-                if (settingsCloseButton) {
-                    settingsCloseButton.addEventListener('click', function() {
-                        settingsPopup.classList.add('hidden');
-                    });
-                    console.log('Settings close button event listener added');
-                }
-                
-                // Add keyboard shortcut - 'S' for settings
-                document.addEventListener('keydown', function(event) {
-                    if ((event.key === 's' || event.key === 'S') && 
-                        document.activeElement.tagName !== 'INPUT' && 
-                        document.activeElement.tagName !== 'TEXTAREA') {
-                        event.preventDefault();
-                        toggleSettings();
-                    }
-                });
-                
-                // Click outside to close
-                document.addEventListener('click', function(event) {
-                    if (!settingsPopup.classList.contains('hidden') &&
-                        !settingsPopup.contains(event.target) && 
-                        event.target !== settingsToggleButton) {
-                        settingsPopup.classList.add('hidden');
-                    }
-                });
-                
-                console.log('Settings popup setup complete');
             }
             
-            // Run after a slight delay to ensure all elements are loaded
-            setTimeout(setupSettings, 100);
+            // Setup event listeners
+            if (settingsToggleButton) {
+                settingsToggleButton.addEventListener('click', toggleSettings);
+                console.log('Settings toggle button event listener added');
+            }
+            
+            if (settingsCloseButton) {
+                settingsCloseButton.addEventListener('click', function() {
+                    settingsPopup.classList.add('hidden');
+                });
+                console.log('Settings close button event listener added');
+            }
+            
+            // Add keyboard shortcut - 'S' for settings
+            document.addEventListener('keydown', function(event) {
+                if ((event.key === 's' || event.key === 'S') && 
+                    document.activeElement.tagName !== 'INPUT' && 
+                    document.activeElement.tagName !== 'TEXTAREA') {
+                    event.preventDefault();
+                    toggleSettings();
+                }
+            });
+            
+            // Click outside to close
+            document.addEventListener('click', function(event) {
+                if (!settingsPopup.classList.contains('hidden') &&
+                    !settingsPopup.contains(event.target) && 
+                    event.target !== settingsToggleButton) {
+                    settingsPopup.classList.add('hidden');
+                }
+            });
+            
+            console.log('Simplified Settings popup setup complete');
         })();
 
-        // Add this script to index.html (at the end before closing body tag)
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get the mode radio buttons
-            const noteMode = document.getElementById('noteMode');
-            const triadMode = document.getElementById('triadMode');
-            
-            // Get the submenu elements
-            const noteTypes = document.getElementById('noteTypes');
-            const triadInversions = document.getElementById('triadInversions');
-            
-            // Add event listener to show/hide appropriate submenu
-            function updateSubmenus() {
-                if (noteMode.checked) {
-                    noteTypes.style.display = 'block';
-                    triadInversions.style.display = 'block';
-                } else if (triadMode.checked) {
-                    noteTypes.style.display = 'block';
-                    triadInversions.style.display = 'block';
-                }
-            }
-            
-            // Add change listeners to both radio buttons
-            noteMode.addEventListener('change', updateSubmenus);
-            triadMode.addEventListener('change', updateSubmenus);
-            
-            // Initialize submenus based on current selection
-            updateSubmenus();
-            
-            console.log('Mode toggle handlers initialized');
-        });
-
+        // Update the top bar creation to use the simpler approach
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Creating clean top bar...');
             
@@ -1330,6 +1268,25 @@
             
             console.log('Clean top bar created with all buttons');
         });
+
+        // Add to your main script, perhaps in the DOMContentLoaded event
+        document.addEventListener('click', function() {
+            // Initialize audio context on first user interaction
+            if (typeof initAudioContext === 'function') {
+                initAudioContext();
+            }
+        }, { once: true });
+
+        // Also for spacebar and other key presses
+        document.addEventListener('keydown', function() {
+            if (typeof initAudioContext === 'function') {
+                initAudioContext();
+            }
+        }, { once: true });
+
+        // Then you can make them available to other scripts by adding them to the window object
+        window.setCookie = setCookie;
+        window.getCookie = getCookie;
     </script>
 </body>
 </html>
