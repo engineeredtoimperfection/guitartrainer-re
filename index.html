@@ -10,12 +10,8 @@
     <div class="container">
         <h1>Guitar Fretboard Trainer</h1>
         
-        <div class="help-container" id="help-container">
-            <button id="help-button" class="help-button">?</button>
-        </div>
         
         <div class="options">
-            <h3>Settings <button id="toggle-settings" class="toggle-button"></button></h3>
             <div id="settings-content" class="settings-content">
                 Fret Range: 
                 <input type="number" id="minFret" min="0" max="16" value="0"> to 
@@ -148,6 +144,20 @@
 </svg>
             <span>Open Source on GitHub</span>
         </a>
+    </div>
+
+    <div class="header-control settings-button-container">
+        <button id="settings-toggle-button" class="icon-button" title="Settings (S)">⚙️</button>
+    </div>
+
+    <div id="settings-popup" class="settings-popup hidden">
+        <div id="settings-header">
+            <h3>Settings</h3>
+            <button id="settings-close" class="close-button">X</button>
+        </div>
+        <div id="settings-container">
+            <!-- Settings content will be moved here by JavaScript -->
+        </div>
     </div>
 
     <script src="fretboard.js"></script>
@@ -472,9 +482,9 @@
             
             if (document.getElementById('noteMode').checked) {
                 noteTypes.style.display = 'block';
-                triadInversions.style.display = 'none';
+                triadInversions.style.display = 'block';
             } else {
-                noteTypes.style.display = 'none';
+                noteTypes.style.display = 'block';
                 triadInversions.style.display = 'block';
             }
         }
@@ -1080,6 +1090,246 @@
             
             console.log('Circle of Fifths keyboard shortcut setup complete');
         })();
+
+        // Updated Settings Popup functionality
+        (function() {
+            console.log('Setting up Settings popup...');
+            
+            // Run this function when the document is ready
+            function setupSettings() {
+                // Try different selectors for existing settings elements
+                const existingSettings = document.querySelector('.settings-panel') || 
+                                        document.querySelector('.options') || 
+                                        document.querySelector('.settings');
+                
+                const settingsToggleButton = document.getElementById('settings-toggle-button');
+                const settingsPopup = document.getElementById('settings-popup');
+                const settingsCloseButton = document.getElementById('settings-close');
+                const settingsContainer = document.getElementById('settings-container');
+                
+                if (!existingSettings) {
+                    console.error('Settings panel not found with any selector');
+                    return;
+                }
+                
+                if (!settingsPopup || !settingsContainer) {
+                    console.error('Settings popup elements not found');
+                    return;
+                }
+                
+                // Clone the settings content to move to the popup
+                const settingsContent = existingSettings.cloneNode(true);
+                
+                // Remove the toggle button from the cloned content
+                const toggleButton = settingsContent.querySelector('#toggle-settings');
+                if (toggleButton) {
+                    toggleButton.remove();
+                }
+                
+                // Find the settings-content div and make sure it's visible
+                const innerSettingsContent = settingsContent.querySelector('.settings-content');
+                if (innerSettingsContent) {
+                    innerSettingsContent.style.display = 'block';
+                    innerSettingsContent.style.maxHeight = 'none'; // Ensure no height restrictions
+                }
+                
+                // Clear the container and add the settings
+                settingsContainer.innerHTML = '';
+                settingsContainer.appendChild(settingsContent);
+                
+                // Ensure settings are visible within the popup
+                settingsContent.style.display = 'block';
+                
+                // Hide the original settings panel
+                existingSettings.style.display = 'none';
+                
+                // Function to toggle settings popup visibility
+                function toggleSettings(event) {
+                    if (event) {
+                        event.stopPropagation();
+                    }
+                    
+                    const isHidden = settingsPopup.classList.contains('hidden');
+                    console.log('Toggling Settings, currently hidden:', isHidden);
+                    
+                    if (isHidden) {
+                        // Show settings
+                        settingsPopup.classList.remove('hidden');
+                        
+                        // Hide other popups
+                        const cofTooltip = document.getElementById('circle-of-fifths-tooltip');
+                        const instructionsTooltip = document.getElementById('instructions-tooltip');
+                        
+                        if (cofTooltip) cofTooltip.classList.add('hidden');
+                        if (instructionsTooltip) instructionsTooltip.classList.add('hidden');
+                    } else {
+                        // Hide settings
+                        settingsPopup.classList.add('hidden');
+                    }
+                }
+                
+                // Setup event listeners
+                if (settingsToggleButton) {
+                    settingsToggleButton.addEventListener('click', toggleSettings);
+                    console.log('Settings toggle button event listener added');
+                }
+                
+                if (settingsCloseButton) {
+                    settingsCloseButton.addEventListener('click', function() {
+                        settingsPopup.classList.add('hidden');
+                    });
+                    console.log('Settings close button event listener added');
+                }
+                
+                // Add keyboard shortcut - 'S' for settings
+                document.addEventListener('keydown', function(event) {
+                    if ((event.key === 's' || event.key === 'S') && 
+                        document.activeElement.tagName !== 'INPUT' && 
+                        document.activeElement.tagName !== 'TEXTAREA') {
+                        event.preventDefault();
+                        toggleSettings();
+                    }
+                });
+                
+                // Click outside to close
+                document.addEventListener('click', function(event) {
+                    if (!settingsPopup.classList.contains('hidden') &&
+                        !settingsPopup.contains(event.target) && 
+                        event.target !== settingsToggleButton) {
+                        settingsPopup.classList.add('hidden');
+                    }
+                });
+                
+                console.log('Settings popup setup complete');
+            }
+            
+            // Run after a slight delay to ensure all elements are loaded
+            setTimeout(setupSettings, 100);
+        })();
+
+        // Add this script to index.html (at the end before closing body tag)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the mode radio buttons
+            const noteMode = document.getElementById('noteMode');
+            const triadMode = document.getElementById('triadMode');
+            
+            // Get the submenu elements
+            const noteTypes = document.getElementById('noteTypes');
+            const triadInversions = document.getElementById('triadInversions');
+            
+            // Add event listener to show/hide appropriate submenu
+            function updateSubmenus() {
+                if (noteMode.checked) {
+                    noteTypes.style.display = 'block';
+                    triadInversions.style.display = 'block';
+                } else if (triadMode.checked) {
+                    noteTypes.style.display = 'block';
+                    triadInversions.style.display = 'block';
+                }
+            }
+            
+            // Add change listeners to both radio buttons
+            noteMode.addEventListener('change', updateSubmenus);
+            triadMode.addEventListener('change', updateSubmenus);
+            
+            // Initialize submenus based on current selection
+            updateSubmenus();
+            
+            console.log('Mode toggle handlers initialized');
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Creating clean top bar...');
+            
+            // Remove any existing top bars
+            const existingBar = document.querySelector('.top-bar');
+            if (existingBar) existingBar.remove();
+            
+            // Create new top bar
+            const topBar = document.createElement('div');
+            topBar.className = 'top-bar';
+            document.body.appendChild(topBar);
+            
+            // Create settings button
+            const settingsButton = document.createElement('button');
+            settingsButton.className = 'top-bar-button';
+            settingsButton.innerHTML = '⚙️';
+            settingsButton.addEventListener('click', function(event) {
+                event.stopPropagation();
+                const settingsPopup = document.getElementById('settings-popup');
+                if (settingsPopup) {
+                    settingsPopup.classList.toggle('hidden');
+                    
+                    // Hide other popups
+                    const cofTooltip = document.getElementById('circle-of-fifths-tooltip');
+                    const instructionsTooltip = document.getElementById('instructions-tooltip');
+                    if (cofTooltip) cofTooltip.classList.add('hidden');
+                    if (instructionsTooltip) instructionsTooltip.classList.add('hidden');
+                }
+            });
+            topBar.appendChild(settingsButton);
+            
+            // Create theme button
+            const themeButton = document.createElement('button');
+            themeButton.className = 'top-bar-button';
+            // Set initial theme icon
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+            themeButton.innerHTML = `<span class="theme-icon">${currentTheme === 'dark' ? '🌕' : '🌑'}</span>`;
+            
+            themeButton.addEventListener('click', function() {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                themeButton.innerHTML = `<span class="theme-icon">${newTheme === 'dark' ? '🌕' : '🌑'}</span>`;
+            });
+            topBar.appendChild(themeButton);
+            
+            // Create Circle of Fifths button
+            const cofButton = document.createElement('button');
+            cofButton.className = 'top-bar-button';
+            cofButton.innerHTML = '🎵';
+            cofButton.addEventListener('click', function(event) {
+                event.stopPropagation();
+                const cofTooltip = document.getElementById('circle-of-fifths-tooltip');
+                if (cofTooltip) {
+                    cofTooltip.classList.toggle('hidden');
+                    
+                    // Hide other popups
+                    const settingsPopup = document.getElementById('settings-popup');
+                    const instructionsTooltip = document.getElementById('instructions-tooltip');
+                    if (settingsPopup) settingsPopup.classList.add('hidden');
+                    if (instructionsTooltip) instructionsTooltip.classList.add('hidden');
+                    
+                    // Render circle if needed
+                    if (!cofTooltip.classList.contains('hidden') && typeof renderCircleOfFifthsFixed === 'function') {
+                        setTimeout(renderCircleOfFifthsFixed, 50);
+                    }
+                }
+            });
+            topBar.appendChild(cofButton);
+            
+            // Create help button
+            const helpButton = document.createElement('button');
+            helpButton.className = 'top-bar-button';
+            helpButton.innerHTML = '❓';
+            helpButton.addEventListener('click', function(event) {
+                event.stopPropagation();
+                const instructionsTooltip = document.getElementById('instructions-tooltip');
+                if (instructionsTooltip) {
+                    instructionsTooltip.classList.toggle('hidden');
+                    
+                    // Hide other popups
+                    const settingsPopup = document.getElementById('settings-popup');
+                    const cofTooltip = document.getElementById('circle-of-fifths-tooltip');
+                    if (settingsPopup) settingsPopup.classList.add('hidden');
+                    if (cofTooltip) cofTooltip.classList.add('hidden');
+                }
+            });
+            topBar.appendChild(helpButton);
+            
+            console.log('Clean top bar created with all buttons');
+        });
     </script>
 </body>
 </html>
