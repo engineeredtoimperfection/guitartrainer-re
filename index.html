@@ -1267,6 +1267,59 @@
         // Then you can make them available to other scripts by adding them to the window object
         window.setCookie = setCookie;
         window.getCookie = getCookie;
+
+        // Add this code to ensure all popups close when clicking outside
+        document.addEventListener('DOMContentLoaded', function() {
+            // Single event listener for all popups
+            document.addEventListener('click', function(event) {
+                // Get all popup elements
+                const cofTooltip = document.getElementById('circle-of-fifths-tooltip');
+                const instructionsTooltip = document.getElementById('instructions-tooltip');
+                const settingsPopup = document.getElementById('settings-popup');
+                
+                // Get all toggle buttons
+                const cofButton = document.querySelector('.top-bar-button:nth-child(3)'); // The Circle of Fifths button
+                const helpButton = document.querySelector('.top-bar-button:nth-child(4)'); // The help button
+                const settingsButton = document.querySelector('.top-bar-button:nth-child(1)'); // The settings button
+                
+                // Circle of Fifths - close if click is outside and not on the button
+                if (cofTooltip && !cofTooltip.classList.contains('hidden') && 
+                    !cofTooltip.contains(event.target) && 
+                    event.target !== cofButton && 
+                    (cofButton && !cofButton.contains(event.target))) {
+                    cofTooltip.classList.add('hidden');
+                    if (cofButton) cofButton.classList.remove('active');
+                }
+                
+                // Instructions - close if click is outside and not on the button
+                if (instructionsTooltip && !instructionsTooltip.classList.contains('hidden') && 
+                    !instructionsTooltip.contains(event.target) && 
+                    event.target !== helpButton && 
+                    (helpButton && !helpButton.contains(event.target))) {
+                    instructionsTooltip.classList.add('hidden');
+                    if (helpButton) helpButton.classList.remove('active');
+                }
+                
+                // Settings - close if click is outside and not on the button
+                if (settingsPopup && !settingsPopup.classList.contains('hidden') && 
+                    !settingsPopup.contains(event.target) && 
+                    event.target !== settingsButton && 
+                    (settingsButton && !settingsButton.contains(event.target))) {
+                    settingsPopup.classList.add('hidden');
+                    if (settingsButton) settingsButton.classList.remove('active');
+                }
+            });
+            
+            // Add active class to style buttons when their popups are open
+            const style = document.createElement('style');
+            style.textContent = `
+                .top-bar-button.active {
+                    background: rgba(0, 204, 153, 0.3);
+                    box-shadow: 0 0 5px rgba(0, 204, 153, 0.5);
+                }
+            `;
+            document.head.appendChild(style);
+        });
     </script>
 </body>
 </html>
