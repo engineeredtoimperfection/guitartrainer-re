@@ -218,21 +218,42 @@ button:hover {
     font-weight: bold;
 }
 #progress {
-    padding: 15px;
-    border-radius: 8px;
-    color: var(--secondary-text);
     text-align: center;
+    margin: 15px 0;
 }
 #progress span {
     color: #00cc99;
     font-weight: bold;
 }
+#progress button {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 10px 5px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
 #reset-score {
-    background: #ff6666;
-    margin-top: 10px;
+    background-color: transparent !important; /* Transparent background */
+    color: #ff6666 !important; /* Red text color */
+    border: 2px solid #ff6666 !important; /* Red border */
+    transition: all 0.2s ease !important;
+    outline: none !important;
 }
 #reset-score:hover {
-    background: #e65c5c;
+    background-color: rgba(255, 102, 102, 0.1) !important; /* Very subtle background on hover */
+    border-color: #ff3333 !important; /* Darker red border on hover */
+    color: #ff3333 !important; /* Darker red text on hover */
+}
+/* Ensure these states also look consistent */
+#reset-score:active,
+#reset-score:focus,
+#reset-score:visited {
+    background-color: transparent !important;
+    outline: none !important;
+    color: #ff3333 !important;
+    border-color: #ff3333 !important;
+    box-shadow: none !important;
 }
 /* Sound button with white border and black background */
 #soundButton {
@@ -1614,4 +1635,135 @@ html, body {
 .top-bar-button:hover {
     background: rgba(0, 204, 153, 0.2) !important;
     transform: scale(1.05) !important;
+}
+
+/* Add this CSS rule */
+#heatmap-toggle {
+    margin-left: 10px;
+    background-color: transparent;
+    color: var(--button-text);
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+#heatmap-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Force buttons to be inline */
+#progress .button-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+#progress button {
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+    background-color: var(--accent-color);
+    color: var(--button-text);
+    border: none;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+#progress button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Override any theme-toggle specific styling */
+#progress .theme-toggle {
+    width: auto !important;
+    height: auto !important;
+    padding: 10px 16px !important;
+    display: block !important;
+    border-radius: 6px !important;
+    background-color: var(--accent-color) !important;
+    color: var(--button-text) !important;
+    border: none !important;
+    font-weight: 500 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    transition: all 0.2s ease !important;
+}
+
+#progress .theme-toggle:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Reset the previous active styles */
+#heatmap-toggle.active-toggle {
+    animation: none !important;
+    background-color: transparent !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* New border glow effect */
+#heatmap-toggle.active-toggle {
+    border: 2px solid var(--accent-color) !important;
+    box-shadow: 0 0 5px var(--accent-color) !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Subtle pulse animation for the border */
+@keyframes borderPulse {
+    0% { border-color: var(--accent-color); box-shadow: 0 0 5px var(--accent-color); }
+    50% { border-color: #00ffcc; box-shadow: 0 0 8px #00ffcc; }
+    100% { border-color: var(--accent-color); box-shadow: 0 0 5px var(--accent-color); }
+}
+
+#heatmap-toggle.active-toggle {
+    animation: borderPulse 2s infinite;
+}
+
+/* Base styles for heatmap toggle - never filled */
+#heatmap-toggle,
+#heatmap-toggle.theme-toggle {
+    background-color: transparent !important;
+    border: 2px solid var(--accent-color) !important;
+    color: var(--text-color) !important; /* Use text color instead of button text */
+    box-shadow: none !important;
+}
+
+/* Hover state - still no fill */
+#heatmap-toggle:hover,
+#heatmap-toggle.theme-toggle:hover {
+    background-color: transparent !important;
+    border-color: #00ffcc !important;
+    box-shadow: 0 0 5px rgba(0, 255, 204, 0.4) !important;
+}
+
+/* Active state - pulsing border only */
+#heatmap-toggle.active-toggle,
+#heatmap-toggle.theme-toggle.active-toggle {
+    background-color: transparent !important;
+    color: var(--text-color) !important;
+    box-shadow: 0 0 5px var(--accent-color) !important;
+    animation: borderPulse 2s infinite !important;
+}
+
+/* Border pulse animation */
+@keyframes borderPulse {
+    0% { border-color: var(--accent-color); box-shadow: 0 0 5px var(--accent-color); }
+    50% { border-color: #00ffcc; box-shadow: 0 0 8px #00ffcc; }
+    100% { border-color: var(--accent-color); box-shadow: 0 0 5px var(--accent-color); }
+}
+
+/* Override any other styles from parent containers */
+#progress #heatmap-toggle,
+.button-row #heatmap-toggle,
+button#heatmap-toggle {
+    background-color: transparent !important;
 }

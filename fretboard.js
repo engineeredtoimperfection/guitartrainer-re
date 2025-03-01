@@ -155,3 +155,190 @@ function debounce(func, wait) {
 window.addEventListener('resize', debounce(() => {
     positionDots();
 }, 100));
+
+// Heatmap rendering function
+function renderHeatmap() {
+    const fretboard = document.getElementById('fretboard');
+    // Clear any existing heatmap dots
+    document.querySelectorAll('.heatmap-dot').forEach(el => el.remove());
+    
+    // Get performance data from cookies
+    const noteLog = JSON.parse(getCookie('noteLog') || '[]');
+    const chordLog = JSON.parse(getCookie('chordLog') || '[]');
+    
+    // Combine both logs
+    const allLogs = [...noteLog, ...chordLog];
+    
+    // If no data, show message and return
+    if (allLogs.length === 0) {
+        const message = document.createElement('div');
+        message.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 10;
+        `;
+        message.textContent = 'No performance data available yet';
+        fretboard.appendChild(message);
+        return;
+    }
+    
+    // Count correct/incorrect answers for each string/fret combination
+    const heatmapData = {};
+    
+    allLogs.forEach(log => {
+        const key = `${log.string}-${log.fret}`;
+        if (!heatmapData[key]) {
+            heatmapData[key] = { correct: 0, incorrect: 0, total: 0 };
+        }
+        
+        if (log.result === 'correct') {
+            heatmapData[key].correct++;
+        } else {
+            heatmapData[key].incorrect++;
+        }
+        heatmapData[key].total++;
+    });
+    
+    // Create heatmap visuals - attach directly to fret elements like notes
+    Object.keys(heatmapData).forEach(key => {
+        const [string, fret] = key.split('-').map(Number);
+        const data = heatmapData[key];
+        
+        // Find the fret element - using same selector logic as showNotesOnFretboard
+        let fretElement;
+        if (fret === 0) {
+            fretElement = document.querySelector(`.string[data-string="${string}"] .fret.open`);
+        } else {
+            fretElement = document.querySelector(`.string[data-string="${string}"] .fret[data-fret="${fret}"]`);
+        }
+        
+        if (fretElement) {
+            // Calculate color based on correct/incorrect ratio
+            const ratio = data.correct / data.total;
+            let color;
+            if (ratio >= 0.8) {
+                // Green for mostly correct
+                color = `rgba(0, 204, 153, ${Math.min(0.9, 0.3 + data.total * 0.05)})`;
+            } else if (ratio >= 0.5) {
+                // Yellow for mixed
+                color = `rgba(255, 204, 0, ${Math.min(0.9, 0.3 + data.total * 0.05)})`;
+            } else {
+                // Red for mostly incorrect
+                color = `rgba(255, 102, 102, ${Math.min(0.9, 0.3 + data.total * 0.05)})`;
+            }
+            
+            // Size based on total attempts
+            const size = Math.min(40, 15 + data.total * 2);
+            
+            // Create heat dot - attach directly to the fret element
+            const dot = document.createElement('div');
+            dot.className = 'heatmap-dot';
+            
+            dot.style.cssText = `
+                width: ${size}px;
+                height: ${size}px;
+                background-color: ${color};
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                border-radius: 50%;
+                opacity: 0.7;
+                z-index: ${90 + data.total}; /* Below the note display but above frets */
+                pointer-events: none;
+                box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+            `;
+            
+            // Tooltip with stats
+            dot.title = `${data.correct} correct / ${data.total} total (${Math.round(ratio * 100)}%)`;
+            
+            fretElement.appendChild(dot);
+        }
+    });
+}
+
+// Update setupHeatmap function
+function setupHeatmap() {
+    const heatmapToggle = document.getElementById('heatmap-toggle');
+    const resetScoreButton = document.getElementById('reset-score');
+    
+    if (heatmapToggle) {
+        // Set the initial text/icon
+        heatmapToggle.textContent = '🔥';
+        
+        heatmapToggle.addEventListener('click', function() {
+            const fretboard = document.getElementById('fretboard');
+            const heatmapActive = fretboard.classList.contains('heatmap-active');
+            
+            if (heatmapActive) {
+                // Turn off heatmap
+                clearHeatmap();
+                // Remove active state from button
+                heatmapToggle.classList.remove('active-toggle');
+            } else {
+                // Turn on heatmap
+                renderHeatmap();
+                fretboard.classList.add('heatmap-active');
+                // Add active state to button
+                heatmapToggle.classList.add('active-toggle');
+            }
+        });
+    }
+    
+    // Add reset functionality
+    if (resetScoreButton) {
+        // Add event listener to clear logs when reset is clicked
+        resetScoreButton.addEventListener('click', function() {
+            // Clear the heatmap if it's active
+            clearHeatmap();
+            
+            // Clear the log cookies
+            clearLogCookies();
+        });
+    }
+}
+
+// Update clearHeatmap function
+function clearHeatmap() {
+    const fretboard = document.getElementById('fretboard');
+    const heatmapToggle = document.getElementById('heatmap-toggle');
+    
+    document.querySelectorAll('.heatmap-dot').forEach(el => el.remove());
+    fretboard.classList.remove('heatmap-active');
+    if (heatmapToggle) heatmapToggle.classList.remove('active-toggle');
+}
+
+// Function to clear the note and chord log cookies
+function clearLogCookies() {
+    // Set both cookies to empty arrays
+    document.cookie = "noteLog=[]" + "; path=/; max-age=" + 60*60*24*365; // 1 year expiration
+    document.cookie = "chordLog=[]" + "; path=/; max-age=" + 60*60*24*365; // 1 year expiration
+    console.log("Note and chord logs have been cleared");
+}
+
+// Helper function to set cookies
+function setCookie(name, value, days) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = name + '=' + value + ';path=/;expires=' + expires.toUTCString();
+}
+
+// Helper function to read cookies - duplicate of the one in main script
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    return parts.length === 2 ? parts.pop().split(';').shift() : null;
+}
+
+// Then add a call to setupHeatmap at the end of the file
+window.addEventListener('DOMContentLoaded', function() {
+    setupHeatmap();
+});

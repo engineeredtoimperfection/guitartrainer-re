@@ -117,8 +117,11 @@
         <div id="progress">
             Correct: <span id="correct">0</span> |
             Total: <span id="total">0</span> |
-            Percentage: <span id="percentage">0%</span><br>
-            <button id="reset-score">Reset Score</button>
+            Percentage: <span id="percentage">0%</span>
+            <div class="button-row">
+                <button id="reset-score">Reset Data</button>
+                <button id="heatmap-toggle">Show Heatmap</button>
+            </div>
         </div>
 
         <div id="circle-of-fifths-tooltip" class="circle-of-fifths-tooltip hidden">
@@ -480,6 +483,34 @@
             setCookie('total', totalCount, 30);
             loadProgress();
             
+            // Log the fret/string combination and result
+            const isTriadMode = document.getElementById('triadMode').checked;
+            if (isTriadMode && currentChord) {
+                // For triads, log each note in the chord
+                const chordLog = JSON.parse(getCookie('chordLog') || '[]');
+                currentChord.forEach(([string, fret]) => {
+                    chordLog.push({
+                        string: string,
+                        fret: fret,
+                        chord: correct,
+                        result: isCorrect ? 'correct' : 'incorrect',
+                        timestamp: Date.now()
+                    });
+                });
+                setCookie('chordLog', JSON.stringify(chordLog), 90); // Store for 90 days
+            } else {
+                // For single notes, log the current string/fret
+                const noteLog = JSON.parse(getCookie('noteLog') || '[]');
+                noteLog.push({
+                    string: currentString,
+                    fret: currentFret,
+                    note: correct,
+                    result: isCorrect ? 'correct' : 'incorrect',
+                    timestamp: Date.now()
+                });
+                setCookie('noteLog', JSON.stringify(noteLog), 90); // Store for 90 days
+            }
+            
             if (isCorrect) {
                 // Find and highlight the button that was clicked
                 const buttons = document.querySelectorAll('#answer-buttons button');
@@ -488,7 +519,6 @@
                         button.classList.add('correct-answer-highlight');
                     }
                 });
-                
                 // If correct, proceed to next question after delay
                 setTimeout(() => {
                     // Remove any highlights before moving on
