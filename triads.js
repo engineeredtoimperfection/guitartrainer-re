@@ -65,10 +65,10 @@ const triadShapes = {
         ],
         // First inversion triads (♭3rd in bass)
         first: [
-            [[0, 0], [1, 0], [2, 3]],  // Em-based 1st inversion
-            [[0, 0], [1, 2], [2, 2]],  // Am-based 1st inversion
-            [[0, 0], [1, 2], [2, 0]],  // Dm-based 1st inversion
-            [[0, 0], [1, 3], [2, 3]]   // Compact 1st inversion
+            [[0, 0], [1, 3], [2, 3]],  // Em-based 1st inversion (♭3rd, 5th, root)
+            [[0, 0], [1, 3], [2, 2]],  // Am-based 1st inversion (♭3rd, root, 5th)
+            [[0, 0], [1, 2], [2, 1]],  // Dm-based 1st inversion (♭3rd, 5th, root)
+            [[0, 0], [1, 2], [2, 0]]   // Compact 1st inversion (♭3rd, root, 5th)
         ],
         // Second inversion triads (5th in bass)
         second: [
