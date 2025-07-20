@@ -9,7 +9,7 @@ const circleKeys = [
     { key: 'C#', alt: 'Db', angle: 210 },
     { key: 'G#', alt: 'Ab', angle: 240 },
     { key: 'D#', alt: 'Eb', angle: 270 },
-    { key: 'Bb', alt: 'A#', angle: 300 },
+    { key: 'A#', alt: 'Bb', angle: 300 },
     { key: 'F', angle: 330 }
 ];
 
